@@ -8,9 +8,7 @@ save filtered and unfiltered versions to pcd files
 #include <pcl/point_types.h>
 #include <pcl/visualization/cloud_viewer.h>
 #include <pcl/io/pcd_io.h>
-//#include <boost/program_options.hpp>
 using namespace std;
-//using namespace boost::program_options;
 
 typedef pcl::PointCloud<pcl::PointXYZ> PointCloud;
 
@@ -45,9 +43,9 @@ void visualize_cloud(const PointCloud::Ptr cloud)
 
 int main(int argc, char **argv)
 {
-    bool decimation = false;
-    bool threshold = false;
-    bool spatial = false;
+    bool decimation = true;
+    bool threshold = true;
+    bool spatial = true;
     bool temporal = false;
     bool hole_filling = false;
 
