@@ -144,8 +144,6 @@ add_definitions(${PCL_DEFINITIONS})
 ## The recommended prefix ensures that target names across packages don't collide
 # add_executable(${PROJECT_NAME}_node src/scanning_node.cpp)
 
-add_executable(realsense_post_process src/realsense_post_process.cpp)
-
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
 ## target back to the shorter version for ease of user use
@@ -160,12 +158,6 @@ add_executable(realsense_post_process src/realsense_post_process.cpp)
 # target_link_libraries(${PROJECT_NAME}_node
 #   ${catkin_LIBRARIES}
 # )
-
-target_link_libraries(realsense_post_process
-    ${PCL_LIBRARIES}
-    -lrealsense2
-    #-lboost_program_options
-)
 
 #############
 ## Install ##
