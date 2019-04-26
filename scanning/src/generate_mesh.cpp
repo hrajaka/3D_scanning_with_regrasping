@@ -8,10 +8,18 @@
 int
 main (int argc, char** argv)
 {
+
+
+  if (argc != 2)
+  {
+    std::cout << "Please provide a filename for input file and output file" << std::endl;
+    return -1;
+  }
+
   // Load input file into a PointCloud<T> with an appropriate type
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PCLPointCloud2 cloud_blob;
-  pcl::io::loadPCDFile ("pawn.pcd", cloud_blob);
+  pcl::io::loadPCDFile (argv[1], cloud_blob);
   pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
 
   // Normal estimation
@@ -56,7 +64,7 @@ main (int argc, char** argv)
   std::vector<int> parts = gp3.getPartIDs();
   std::vector<int> states = gp3.getPointStates();
 
-  pcl::io::saveOBJFile	("pawn.obj", triangles);
+  pcl::io::saveOBJFile	(argv[2], triangles);
 
   // Finish
   return (0);

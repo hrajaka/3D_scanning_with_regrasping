@@ -12,14 +12,22 @@
 
 int main()
 {
+
+
+  if (argc != 4)
+  {
+    std::cout << "Please provide a filename for empty scene, object scene and output file" << std::endl;
+    return -1;
+  }
+
   // Loading stuff //
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_table (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_pawn (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::ExtractIndices<pcl::PointXYZ> extract;
   pcl::PointIndices::Ptr outliers(new pcl::PointIndices());
 
-  pcl::io::loadPCDFile ("ros_table_cleaned.pcd", *cloud_table);
-  pcl::io::loadPCDFile ("ros_pawn_cleaned.pcd", *cloud_pawn);
+  pcl::io::loadPCDFile (argv[1], *cloud_table);
+  pcl::io::loadPCDFile (argv[2], *cloud_pawn);
 
   // Creating the viewer //
   pcl::visualization::PCLVisualizer *viewer;
@@ -68,7 +76,7 @@ int main()
 
   // Saving etc //
   pcl::PCDWriter pcd_writer;
-  pcd_writer.write("pawn.pcd", *cloud_pawn);
+  pcd_writer.write(argv[3], *cloud_pawn);
 
   // // Creating the viewer //
   // pcl::visualization::PCLVisualizer *viewer;

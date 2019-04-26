@@ -13,11 +13,17 @@ int
  main (int argc, char** argv)
 {
 
+  if (argc != 3)
+  {
+    std::cout << "Please provide a filename for input file and output file" << std::endl;
+    return -1;
+  }
+
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_filtered (new pcl::PointCloud<pcl::PointXYZ>);
 
 
-  pcl::io::loadPCDFile ("ros_pawn_disparity.pcd", *cloud);
+  pcl::io::loadPCDFile (argv[1], *cloud);
 
   std::cout << "Initial number of points: " << cloud->size () << std::endl;
 
@@ -64,7 +70,7 @@ int
 
 
   pcl::PCDWriter writer;
-  writer.write<pcl::PointXYZ> ("ros_pawn_disparity_cleaned.pcd", *cloud_filtered, false);
+  writer.write<pcl::PointXYZ> (argv[2], *cloud_filtered, false);
 
   // Creating the viewer //
   pcl::visualization::PCLVisualizer *viewer;
