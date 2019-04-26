@@ -142,7 +142,9 @@ add_definitions(${PCL_DEFINITIONS})
 ## Declare a C++ executable
 ## With catkin_make all packages are built within a single CMake context
 ## The recommended prefix ensures that target names across packages don't collide
-# add_executable(${PROJECT_NAME}_node src/scanning_node.cpp)
+add_executable(background_removal src/background_removal.cpp)
+add_executable(generate_mesh src/generate_mesh.cpp)
+add_executable(point_cloud_cleaner src/point_cloud_cleaner.cpp)
 
 add_executable(visualize_pcd src/visualize_pcd.cpp)
 
@@ -157,9 +159,9 @@ add_executable(visualize_pcd src/visualize_pcd.cpp)
 # add_dependencies(${PROJECT_NAME}_node ${${PROJECT_NAME}_EXPORTED_TARGETS} ${catkin_EXPORTED_TARGETS})
 
 ## Specify libraries to link a library or executable target against
-# target_link_libraries(${PROJECT_NAME}_node
-#   ${catkin_LIBRARIES}
-# )
+target_link_libraries(background_removal ${PCL_LIBRARIES})
+target_link_libraries(generate_mesh ${PCL_LIBRARIES})
+target_link_libraries(point_cloud_cleaner ${PCL_LIBRARIES})
 
 target_link_libraries(visualize_pcd
     ${PCL_LIBRARIES}
