@@ -19,7 +19,7 @@ if __name__ == '__main__':
     translation = np.array([0.2, -0.8, 0.4])
     rigid_transfo = autolab_core.RigidTransform(rotation=rotation, translation=translation, from_frame='camera', to_frame='world')
 
-    pawn = trimesh.exchange.load.load('pawn.obj')
+    pawn = trimesh.exchange.load.load('../obj_files/pawn.obj')
     pawn.fix_normals()
 
     xs = []
@@ -55,17 +55,17 @@ if __name__ == '__main__':
     box_size_z = 20
     box = -1 * np.ones((box_size_x, box_size_y, box_size_z)) # one tile per centimeter
     box_corners = [[0,              0,              0             ],
-                   [box_size_x/100, 0,              0             ],
-                   [0,              box_size_y/100, 0             ],
-                   [0,              0,              box_size_z/100],
-                   [box_size_x/100, box_size_y/100, 0             ],
-                   [box_size_x/100, 0,              box_size_z/100],
-                   [0,              box_size_y/100, box_size_z/100],
-                   [box_size_x/100, box_size_y/100, box_size_z/100]]
+                   [box_size_x/100., 0,              0             ],
+                   [0,              box_size_y/100., 0             ],
+                   [0,              0,              box_size_z/100.],
+                   [box_size_x/100., box_size_y/100., 0             ],
+                   [box_size_x/100., 0,              box_size_z/100.],
+                   [0,              box_size_y/100., box_size_z/100.],
+                   [box_size_x/100., box_size_y/100., box_size_z/100.]]
 
-    ax.plot3D([0,              0,              0,              0, 0, box_size_x/100, box_size_x/100, box_size_x/100, box_size_x/100, box_size_x/100, box_size_x/100,              0,              0, box_size_x/100, box_size_x/100,             0],
-              [0,              0, box_size_y/100, box_size_y/100, 0,              0,              0, box_size_y/100, box_size_y/100,              0, box_size_y/100, box_size_y/100, box_size_y/100, box_size_y/100,              0,             0],
-              [0, box_size_z/100, box_size_z/100,              0, 0,              0, box_size_z/100, box_size_z/100,              0,              0,              0,              0, box_size_z/100, box_size_z/100, box_size_z/100, box_size_z/100])
+    ax.plot3D([0,               0,               0,               0, 0, box_size_x/100., box_size_x/100., box_size_x/100., box_size_x/100., box_size_x/100., box_size_x/100.,               0,               0, box_size_x/100., box_size_x/100.,               0],
+              [0,               0, box_size_y/100., box_size_y/100., 0,               0,               0, box_size_y/100., box_size_y/100.,               0, box_size_y/100., box_size_y/100., box_size_y/100., box_size_y/100.,               0,               0],
+              [0, box_size_z/100., box_size_z/100.,               0, 0,               0, box_size_z/100., box_size_z/100.,               0,               0,               0,               0, box_size_z/100., box_size_z/100., box_size_z/100., box_size_z/100.])
 
 
     ## Taking care of the points that are on the mesh ##
@@ -127,9 +127,9 @@ if __name__ == '__main__':
         for i in range(box_size_y):
             for j in range(box_size_z):
                 if box[k, i, j] == 1:
-                    ax.scatter(k/100, i/100, j/100, c='k', marker='o', s=0.5)
+                    ax.scatter(k/100., i/100., j/100., c='k', marker='o', s=0.5)
                 if box[k, i, j] == -1:
-                    ax.scatter(k/100, i/100, j/100, c='gray', marker='o', s=0.5)
+                    ax.scatter(k/100., i/100., j/100., c='gray', marker='o', s=0.5)
 
 
     ax.view_init(elev=0.1, azim=0)
