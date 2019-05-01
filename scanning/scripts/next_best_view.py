@@ -6,6 +6,7 @@ from mpl_toolkits.mplot3d import Axes3D
 import scipy.spatial
 import matplotlib.path
 
+from kin_func_skeleton import rotation_3d
 
 
 ####
@@ -19,7 +20,7 @@ if __name__ == '__main__':
     translation = np.array([0.2, -0.8, 0.4])
     rigid_transfo = autolab_core.RigidTransform(rotation=rotation, translation=translation, from_frame='camera', to_frame='world')
 
-    pawn = trimesh.exchange.load.load('../obj_files/pawn.obj')
+    pawn = trimesh.exchange.load.load('pawn.obj')
     pawn.fix_normals()
 
     xs = []
@@ -132,12 +133,77 @@ if __name__ == '__main__':
                     ax.scatter(k/100., i/100., j/100., c='gray', marker='o', s=0.5)
 
 
-    ax.view_init(elev=0.1, azim=0)
-    plt.show()
 
     ## Choosing the next best view ##
 
-    # TODO
+    for k in range(1):
+        ## choosing a rotation about the world's z axis ##
+
+        rotation_angle = np.pi / 4 # add some randomness
+        rotation_matrix = rotation_3d(np.array([0,0,1]), rotation_angle)
+        camera_center_in_cube_center_frame = camera_center - np.array([0.5*box_size_x/100., 0.5*box_size_y/100., 0])
+        camera_center_in_cube_center_frame_after_rotation = np.matmul(rotation_matrix, camera_center_in_cube_center_frame)
+
+        # ax.scatter([camera_center_in_cube_center_frame_after_rotation[0]], [camera_center_in_cube_center_frame_after_rotation[1]], [camera_center_in_cube_center_frame_after_rotation[2]])
+
+
+        unknown_points_we_can_probably_see = 0
+        occupied_points_we_can_probably_see = 0
+
+        ## Plotting the occupancy grid ##
+        for k in range(box_size_x):
+            print(k)
+            for i in range(box_size_y):
+                for j in range(box_size_z):
+                    if box[k, i, j] == -1:
+                        # we want to check if the camera can see it now
+                        point_pos = np.array([k/100., i/100., j/100.])
+                        vector = camera_center_in_cube_center_frame_after_rotation - point_pos
+                        intersects_with_object = False
+
+                        # we do N steps in the direction of the line until we hit the object, and say the space is free
+                        for step_size in np.linspace(0, 1, 500):
+                            current_point = point_pos + step_size*vector
+
+                            if current_point[0] >= 0 and current_point[0] <= float(box_size_x)/100 and current_point[1] >= 0 and current_point[1] <= float(box_size_y)/100 and current_point[2] >= 0 and current_point[2] <= float(box_size_z)/100:
+
+                                id_x = int(current_point[0]*100)
+                                id_y = int(current_point[1]*100)
+                                id_z = int(current_point[2]*100)
+                                if box[id_x, id_y, id_z] == 1:
+                                    intersects_with_object = True
+                                    break
+                        if not intersects_with_object:
+                            ax.scatter([point_pos[0]], [point_pos[1]], [point_pos[2]], s=0.5, c='g')
+                            unknown_points_we_can_probably_see += 1
+
+                    if box[k, i, j] == 1:
+                        # we want to check if the camera can see it now
+                        point_pos = np.array([k/100., i/100., j/100.])
+                        vector = camera_center_in_cube_center_frame_after_rotation - point_pos
+                        intersects_with_object = False
+
+                        # we do N steps in the direction of the line until we hit the object, and say the space is free
+                        for step_size in np.linspace(0, 1, 500):
+                            current_point = point_pos + step_size*vector
+
+                            if current_point[0] >= 0 and current_point[0] <= float(box_size_x)/100 and current_point[1] >= 0 and current_point[1] <= float(box_size_y)/100 and current_point[2] >= 0 and current_point[2] <= float(box_size_z)/100:
+                                id_x = int(current_point[0]*100)
+                                id_y = int(current_point[1]*100)
+                                id_z = int(current_point[2]*100)
+                                if box[id_x, id_y, id_z] == 1 and id_x != k and id_y != i and id_z != j:
+                                    intersects_with_object = True
+                                    break
+                        if not intersects_with_object:
+                            ax.scatter([point_pos[0]], [point_pos[1]], [point_pos[2]], s=0.5, c='y')
+                            occupied_points_we_can_probably_see += 1
+
+    print('\n')
+    print(unknown_points_we_can_probably_see)
+    print(occupied_points_we_can_probably_see)
+
+    ax.view_init(elev=0.1, azim=0)
+    plt.show()
 
 
 
