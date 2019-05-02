@@ -14,6 +14,8 @@ from kin_func_skeleton import rotation_3d
 
 if __name__ == '__main__':
 
+    ## Defining the transform between the box and the camera ##
+
     rotation = np.array([[1,       0,       0], # 'random' values, they will need to be changed for the final setup
                          [0, -0.1979,  0.9802],
                          [0, -0.9802, -0.1979]])
@@ -70,6 +72,7 @@ if __name__ == '__main__':
 
 
     ## Taking care of the points that are on the mesh ##
+    print("## Updating the occupancy grid for the points on the mesh ##")
 
     list_of_unit_vectors = []
 
@@ -101,8 +104,10 @@ if __name__ == '__main__':
 
 
     ## Now we loop on all points of the box to take care of the ones not aligned with the mesh ##
+
+    print("## Updating the occupancy grid for the points that are not aligned with the mesh ##")
+
     for k in range(box_size_x):
-        print(k)
         for i in range(box_size_y):
             for j in range(box_size_z):
                 if box[k, i, j] == -1:
@@ -123,8 +128,9 @@ if __name__ == '__main__':
                             box[k, i, j] = 0
 
     ## Plotting the occupancy grid ##
+
+    print("## Plotting the occupancy grid ##")
     for k in range(box_size_x):
-        print(k)
         for i in range(box_size_y):
             for j in range(box_size_z):
                 if box[k, i, j] == 1:
@@ -135,24 +141,24 @@ if __name__ == '__main__':
 
 
     ## Choosing the next best view ##
+    print("## Computing the score for N rotations of the occupancy grid ##")
 
-    for k in range(1):
+    for rotation_number in [1, 2, 3, 4]:
         ## choosing a rotation about the world's z axis ##
 
-        rotation_angle = np.pi / 4 # add some randomness
+        rotation_angle = np.pi / rotation_number # add some randomness
         rotation_matrix = rotation_3d(np.array([0,0,1]), rotation_angle)
         camera_center_in_cube_center_frame = camera_center - np.array([0.5*box_size_x/100., 0.5*box_size_y/100., 0])
         camera_center_in_cube_center_frame_after_rotation = np.matmul(rotation_matrix, camera_center_in_cube_center_frame)
 
         # ax.scatter([camera_center_in_cube_center_frame_after_rotation[0]], [camera_center_in_cube_center_frame_after_rotation[1]], [camera_center_in_cube_center_frame_after_rotation[2]])
 
-
         unknown_points_we_can_probably_see = 0
         occupied_points_we_can_probably_see = 0
+        score_dict = {}
 
         ## Plotting the occupancy grid ##
         for k in range(box_size_x):
-            print(k)
             for i in range(box_size_y):
                 for j in range(box_size_z):
                     if box[k, i, j] == -1:
@@ -198,9 +204,20 @@ if __name__ == '__main__':
                             ax.scatter([point_pos[0]], [point_pos[1]], [point_pos[2]], s=0.5, c='y')
                             occupied_points_we_can_probably_see += 1
 
-    print('\n')
-    print(unknown_points_we_can_probably_see)
-    print(occupied_points_we_can_probably_see)
+        # print("Unknown points we can probably see: {}".format(unknown_points_we_can_probably_see))
+        # print("Occupied points we can probably see: {}".format(occupied_points_we_can_probably_see))
+        # print("Score: {}".format(float(occupied_points_we_can_probably_see) / (occupied_points_we_can_probably_see + unknown_points_we_can_probably_see)))
+        score_dict[rotation_angle] = float(occupied_points_we_can_probably_see) / (occupied_points_we_can_probably_see + unknown_points_we_can_probably_see)
+
+    target_score = 1/3 # ie we want one third of points we already know in the points that we can see next time
+    best_angle = score_dict.keys()[0]
+    distance_to_target = abs(score_dict[best_angle] - target_score)
+    for key in score_dict.keys():
+        current_distance_to_target = abs(score_dict[key] - target_score)
+        if current_distance_to_target < distance_to_target:
+            best_angle = score_dict[key]
+
+    print("Rotation that gives the best score: {}".format(best_angle))
 
     ax.view_init(elev=0.1, azim=0)
     plt.show()
