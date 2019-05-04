@@ -10,7 +10,7 @@
 #include <pcl/io/ply_io.h>
 
 
-int main()
+int main(int argc, char **argv)
 {
 
 
