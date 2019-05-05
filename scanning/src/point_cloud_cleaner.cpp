@@ -44,12 +44,14 @@ int
   pcl::PassThrough<pcl::PointXYZ> pass_z;
   pass_z.setInputCloud (cloud);
   pass_z.setFilterFieldName ("z");
-  pass_z.setFilterLimits (0.0, 2.0);
+  pass_z.setFilterLimits (0.2, 2.0);
   pass_z.filter (*cloud_filtered);
 
   printf("PassThrough finished\n");
+  std::cout << "Current number of points: " << cloud_filtered->size () << std::endl;
 
-  // // Reducing size by uniformly sampling
+
+  // Reducing size by uniformly sampling
   // pcl::UniformSampling<pcl::PointXYZ> uniform_sampling;
   // uniform_sampling.setInputCloud (cloud_filtered);
   // uniform_sampling.setRadiusSearch (0.003);
