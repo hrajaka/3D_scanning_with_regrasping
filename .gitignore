@@ -1,2 +1,4 @@
 *.pcd
 *.obj
+/src/scanning/pointclouds/*
+
