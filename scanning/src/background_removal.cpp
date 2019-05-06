@@ -29,7 +29,11 @@ int main(int argc, char **argv)
   pcl::io::loadPCDFile (argv[1], *cloud_table);
   pcl::io::loadPCDFile (argv[2], *cloud_pawn);
 
+	std::cout << "Scene point cloud: " << cloud_table->points.size() << "points" << std::endl;
+	std::cout << "Object point cloud: " << cloud_pawn->points.size() << "points" << std::endl;
+
   // Creating the viewer //
+  /*
   pcl::visualization::PCLVisualizer *viewer;
   viewer = new pcl::visualization::PCLVisualizer();
   viewer->addPointCloud(cloud_pawn, "cloud");
@@ -39,7 +43,7 @@ int main(int argc, char **argv)
   {
     viewer->spinOnce (100);
   }
-
+  */
 
 
   float threshold = 0.04;
@@ -49,6 +53,11 @@ int main(int argc, char **argv)
   int counter = 0;
   for(pcl::PointCloud<pcl::PointXYZ>::iterator it_pawn = cloud_pawn->begin(); it_pawn!= cloud_pawn->end(); it_pawn++)
   {
+		if (count % 1000 == 0)
+		{
+ 	    std::cout << "Looking at object point " << counter << std::endl;
+		}
+
     for(pcl::PointCloud<pcl::PointXYZ>::iterator it_table = cloud_table->begin(); it_table!= cloud_table->end(); it_table++)
     {
       float distance = sqrt(pow(it_table->x - it_pawn->x, 2) + pow(it_table->y - it_pawn->y, 2) + pow(it_table->z - it_pawn->z, 2));
@@ -78,16 +87,15 @@ int main(int argc, char **argv)
   pcl::PCDWriter pcd_writer;
   pcd_writer.write(argv[3], *cloud_pawn);
 
-  // // Creating the viewer //
-  // pcl::visualization::PCLVisualizer *viewer;
-  // viewer = new pcl::visualization::PCLVisualizer();
-  // viewer->addPointCloud(cloud_pawn, "cloud");
-  //
-  //
-  // while (!viewer->wasStopped ())
-  // {
-  //   viewer->spinOnce (100);
-  // }
+  // Creating the viewer //
+  pcl::visualization::PCLVisualizer *viewer;
+  viewer = new pcl::visualization::PCLVisualizer();
+  viewer->addPointCloud(cloud_pawn, "cloud");
+  
+  while (!viewer->wasStopped ())
+  {
+    viewer->spinOnce (100);
+  }
 
   return 0;
 }
