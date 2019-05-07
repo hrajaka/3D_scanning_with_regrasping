@@ -6,8 +6,7 @@
 #include <pcl/common/centroid.h>
 #include <cmath>
 
-int
- main (int argc, char** argv)
+int main (int argc, char** argv)
 {
   if (argc != 3)
   {
@@ -20,23 +19,6 @@ int
 
   pcl::io::loadPCDFile (argv[1], *cloud_1);
   pcl::io::loadPCDFile (argv[2], *cloud_2);
-
-  // ICP stuff //
-
-  // pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
-  // icp.setInputSource(cloud_1);
-  // icp.setInputTarget(cloud_2);
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_final (new pcl::PointCloud<pcl::PointXYZ>);
-  // // pcl::PointCloud<pcl::PointXYZ> cloud_final;
-  // icp.align(*cloud_final);
-  //
-  // std::cout << "has converged:" << icp.hasConverged() << " score: " <<
-  // icp.getFitnessScore() << std::endl;
-  // Eigen::Matrix4f icp_transform = icp.getFinalTransformation();
-  // std::cout << icp_transform << std::endl;
-  //
-  // pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
-  // pcl::transformPointCloud (*cloud_1, *transformed_cloud, icp_transform);
 
   // Other method: manually fitting //
 
@@ -85,20 +67,46 @@ int
   pcl::transformPointCloud (*cloud_2_translated, *cloud_2_rotated, object_transform);
 
 
+
+  // ICP stuff //
+
+  pcl::IterativeClosestPoint<pcl::PointXYZ, pcl::PointXYZ> icp;
+  icp.setInputSource(cloud_1_translated);
+  icp.setInputTarget(cloud_2_rotated);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud_final (new pcl::PointCloud<pcl::PointXYZ>);
+  icp.align(*cloud_final);
+  
+  std::cout << "has converged:" << icp.hasConverged() << " score: " << icp.getFitnessScore() << std::endl;
+  Eigen::Matrix4f icp_transform = icp.getFinalTransformation();
+  std::cout << icp_transform << std::endl;
+  
+  // pcl::PointCloud<pcl::PointXYZ>::Ptr transformed_cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  // pcl::transformPointCloud (*cloud_1_translated, *transformed_cloud, icp_transform);
+
+
   // Creating the viewer //
   pcl::visualization::PCLVisualizer *viewer;
   viewer = new pcl::visualization::PCLVisualizer();
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> red(cloud_1_translated, 255, 0, 0);
-  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green(cloud_2_rotated, 0, 255, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> red(cloud_final, 255, 0, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> green(cloud_1_translated, 0, 255, 0);
+  pcl::visualization::PointCloudColorHandlerCustom<pcl::PointXYZ> yellow(cloud_2_rotated, 255, 255, 0);
 
-  viewer->addPointCloud(cloud_1_translated, red, "cloud_1");
-  viewer->addPointCloud(cloud_2_rotated, green, "cloud_2");
+  // viewer->addPointCloud(cloud_final, red, "cloud_final");
+  viewer->addPointCloud(cloud_1_translated, green, "cloud_1_translated");
+  viewer->addPointCloud(cloud_2_rotated, yellow, "cloud_2_rotated");
   // viewer->addCoordinateSystem(1.0);
+
+
+  pcl::visualization::PCLVisualizer *viewer2;
+  viewer2 = new pcl::visualization::PCLVisualizer();
+  viewer2->addPointCloud(cloud_final, red, "cloud_1_translated");
+  viewer2->addPointCloud(cloud_2_rotated, yellow, "cloud_2_rotated");
 
 
   while (!viewer->wasStopped ())
   {
     viewer->spinOnce ();
+    viewer2->spinOnce ();
   }
 
  return (0);

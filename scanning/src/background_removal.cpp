@@ -53,7 +53,7 @@ int main(int argc, char **argv)
   int counter = 0;
   for(pcl::PointCloud<pcl::PointXYZ>::iterator it_pawn = cloud_pawn->begin(); it_pawn!= cloud_pawn->end(); it_pawn++)
   {
-		if (count % 1000 == 0)
+		if (counter % 1000 == 0)
 		{
  	    std::cout << "Looking at object point " << counter << std::endl;
 		}
