@@ -1,4 +1,4 @@
 *.pcd
 *.obj
 /src/scanning/point_clouds/*
-
+*.DS_Store
