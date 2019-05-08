@@ -146,6 +146,7 @@ add_executable(background_removal src/background_removal.cpp)
 add_executable(generate_mesh src/generate_mesh.cpp)
 add_executable(point_cloud_cleaner src/point_cloud_cleaner.cpp)
 add_executable(aligner src/aligner.cpp)
+add_executable(processing_pipeline src/processing_pipeline.cpp)
 add_executable(visualize_pcd src/visualize_pcd.cpp)
 add_executable(registration src/registration.cpp)
 
@@ -164,7 +165,7 @@ target_link_libraries(background_removal ${PCL_LIBRARIES})
 target_link_libraries(generate_mesh ${PCL_LIBRARIES})
 target_link_libraries(point_cloud_cleaner ${PCL_LIBRARIES})
 target_link_libraries(aligner ${PCL_LIBRARIES})
-
+target_link_libraries(processing_pipeline ${PCL_LIBRARIES})
 target_link_libraries(visualize_pcd ${PCL_LIBRARIES})
 target_link_libraries(registration ${PCL_LIBRARIES})
 
