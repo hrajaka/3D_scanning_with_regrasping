@@ -149,6 +149,7 @@ add_executable(aligner src/aligner.cpp)
 add_executable(processing_pipeline src/processing_pipeline.cpp)
 add_executable(visualize_pcd src/visualize_pcd.cpp)
 add_executable(registration src/registration.cpp)
+add_executable(template_alignment src/template_alignment.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -168,6 +169,7 @@ target_link_libraries(aligner ${PCL_LIBRARIES})
 target_link_libraries(processing_pipeline ${PCL_LIBRARIES})
 target_link_libraries(visualize_pcd ${PCL_LIBRARIES})
 target_link_libraries(registration ${PCL_LIBRARIES})
+target_link_libraries(template_alignment ${PCL_LIBRARIES})
 
 #############
 ## Install ##
