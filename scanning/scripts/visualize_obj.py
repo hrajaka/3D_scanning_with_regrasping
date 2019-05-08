@@ -11,4 +11,5 @@ if __name__ == '__main__':
 
     print('Visualizing {}'.format(sys.argv[1]))
     pawn = trimesh.load(sys.argv[1])
+    pawn.fix_normals()
     pawn.show()

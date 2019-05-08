@@ -100,51 +100,54 @@ pcl::PointCloud<pcl::PointXYZ>::Ptr background_removal(pcl::PointCloud<pcl::Poin
 }
 
 
-// pcl::PolygonMesh generate_mesh(pcl::PointCloud<pcl::PointXYZ>::Ptr cloud)
-// {
-//   pcl::PCLPointCloud2 cloud_blob;
-//   pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
-//
-//   // Normal estimation
-//   pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
-//   pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
-//   pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
-//   tree->setInputCloud (cloud);
-//   n.setInputCloud (cloud);
-//   n.setSearchMethod (tree);
-//   n.setKSearch (20);
-//   n.compute (*normals);
-//
-//   // Concatenate the XYZ and normal fields
-//   pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
-//   pcl::concatenateFields (*cloud, *normals, *cloud_with_normals);
-//
-//   // Create search tree*
-//   pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
-//   tree2->setInputCloud (cloud_with_normals);
-//
-//   // Initialize objects
-//   pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
-//   pcl::PolygonMesh triangles;
-//
-//   // Set the maximum distance between connected points (maximum edge length)
-//   gp3.setSearchRadius (0.03);
-//
-//   // Set typical values for the parameters
-//   gp3.setMu (2.5);
-//   gp3.setMaximumNearestNeighbors (100);
-//   gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
-//   gp3.setMinimumAngle(0);
-//   gp3.setMaximumAngle(M_PI);
-//   gp3.setNormalConsistency(true);
-//
-//   // Get result
-//   gp3.setInputCloud (cloud_with_normals);
-//   gp3.setSearchMethod (tree2);
-//   gp3.reconstruct (triangles);
-//
-//   return triangles;
-// }
+pcl::PolygonMesh generate_mesh(char* name)
+{
+  // Load input file into a PointCloud<T> with an appropriate type
+  pcl::PointCloud<pcl::PointXYZ>::Ptr cloud (new pcl::PointCloud<pcl::PointXYZ>);
+  pcl::PCLPointCloud2 cloud_blob;
+  pcl::io::loadPCDFile (name, cloud_blob);
+  pcl::fromPCLPointCloud2 (cloud_blob, *cloud);
+
+  // Normal estimation
+  pcl::NormalEstimation<pcl::PointXYZ, pcl::Normal> n;
+  pcl::PointCloud<pcl::Normal>::Ptr normals (new pcl::PointCloud<pcl::Normal>);
+  pcl::search::KdTree<pcl::PointXYZ>::Ptr tree (new pcl::search::KdTree<pcl::PointXYZ>);
+  tree->setInputCloud (cloud);
+  n.setInputCloud (cloud);
+  n.setSearchMethod (tree);
+  n.setKSearch (20);
+  n.compute (*normals);
+
+  // Concatenate the XYZ and normal fields
+  pcl::PointCloud<pcl::PointNormal>::Ptr cloud_with_normals (new pcl::PointCloud<pcl::PointNormal>);
+  pcl::concatenateFields (*cloud, *normals, *cloud_with_normals);
+
+  // Create search tree*
+  pcl::search::KdTree<pcl::PointNormal>::Ptr tree2 (new pcl::search::KdTree<pcl::PointNormal>);
+  tree2->setInputCloud (cloud_with_normals);
+
+  // Initialize objects
+  pcl::GreedyProjectionTriangulation<pcl::PointNormal> gp3;
+  pcl::PolygonMesh triangles;
+
+  // Set the maximum distance between connected points (maximum edge length)
+  gp3.setSearchRadius (0.03);
+
+  // Set typical values for the parameters
+  gp3.setMu (2.5);
+  gp3.setMaximumNearestNeighbors (100);
+  gp3.setMaximumSurfaceAngle(M_PI/4); // 45 degrees
+  gp3.setMinimumAngle(0);
+  gp3.setMaximumAngle(M_PI);
+  gp3.setNormalConsistency(true);
+
+  // Get result
+  gp3.setInputCloud (cloud_with_normals);
+  gp3.setSearchMethod (tree2);
+  gp3.reconstruct (triangles);
+
+  return triangles;
+}
 
 
 int
@@ -179,8 +182,8 @@ int
 
   // Removing background and saving
   std::cout << "\nRemoving background" << std::endl;
-  object_isolated = background_removal(background, object_cleaned);
-  writer.write<pcl::PointXYZ> (argv[4], *object_isolated, false);
+  // object_isolated = background_removal(background, object_cleaned);
+  // writer.write<pcl::PointXYZ> (argv[4], *object_isolated, false);
 
   // viewer->addPointCloud(object_isolated, "cloud");
   // while (!viewer->wasStopped ())
@@ -188,9 +191,12 @@ int
   //   viewer->spinOnce (100);
   // }
 
-  // // Generating the obj file and saving
-  // pcl::PolygonMesh mesh = generate_mesh(object_isolated);
-  // pcl::io::saveOBJFile	(argv[5], mesh);
+  pcl::io::loadPCDFile (argv[4], *object_isolated);
+
+  // Generating the obj file and saving
+  std::cout << "\nGenerating obj file" << std::endl;
+  pcl::PolygonMesh mesh = generate_mesh(argv[4]);
+  pcl::io::saveOBJFile (argv[5], mesh);
 
 
   return (0);
