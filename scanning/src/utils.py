@@ -5,7 +5,9 @@ Author: Chris Correa
 """
 import numpy as np
 from numpy import linalg
-
+import trimesh
+from autolab_core import RigidTransform
+from visualization import Visualizer3D as vis3d
 from math import sin, cos, atan2, sqrt
 try:
     from geometry_msgs.msg._Point import Point
@@ -15,6 +17,57 @@ try:
 except:
     ros_enabled = False
 
+def visualize_mesh(mesh):
+    camera_frame = RigidTransform()
+
+    vis3d.mesh(mesh, style='wireframe')
+    vis3d.pose(camera_frame, alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+    vis3d.show()
+
+def visualize_vertices(mesh, vertices):
+    vis3d.mesh(mesh, style='wireframe')
+    vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+    vis3d.points(vertices, color=(1, 0, 0), scale=0.001)
+    vis3d.show()
+
+def visualize_normals(mesh, vertices, normals):
+    scale = 0.01
+    normals_scaled = normals * scale
+
+    vis3d.mesh(mesh, style='wireframe')
+    vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+    vis3d.points(vertices, color=(1, 0, 0), scale=0.001)
+
+    for v, n in zip(vertices, normals_scaled):
+        vis3d.plot3d([v, v+n], color=(1, 0, 0), tube_radius=0.0005)    
+
+    vis3d.show()
+
+def visualize_metrics(mesh, vertices, normals, metrics):
+    scale = 0.01
+    normals_scaled = normals * scale
+
+    vis3d.mesh(mesh, style='wireframe')
+    vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+    vis3d.points(vertices, color=(1, 0, 0), scale=0.001)
+
+    min_score = float(np.min(metrics))
+    max_score = float(np.max(metrics))
+    metrics_normalized = (metrics.astype(float) - min_score) / (max_score - min_score)
+
+    for v, n, m in zip(vertices, normals_scaled, metrics_normalized):
+        vis3d.plot3d([v, v+n], color=(1 - m, m, 0), tube_radius=0.0005)
+
+    vis3d.show()
+
+def compute_metrics(mesh, vertices, normals):
+    # calculate distance from line through vertex and normal to centroid
+    d = np.linalg.norm(np.cross(normals, mesh.centroid - vertices), axis=1)
+    metrics = -1 * d
+
+    return metrics
+    
 def g_inv(g):
     R = g[0:3,0:3]
     p = g[0:3,3]

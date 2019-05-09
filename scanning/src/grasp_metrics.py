@@ -5,7 +5,7 @@ Author: Chris Correa
 """
 # may need more imports
 import numpy as np
-from lab2.utils import vec, adj, look_at_general, hat
+from utils import vec, adj, look_at_general, hat
 import cvxpy as cvx
 import math
 import scipy

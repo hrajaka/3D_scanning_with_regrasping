@@ -13,17 +13,18 @@ import argparse
 from autolab_core import RigidTransform
 import trimesh
 import warnings
+import utils
 warnings.simplefilter("ignore", DeprecationWarning)
 
 
 
 # 106B lab imports
-from lab2.policies import GraspingPolicy
+from policies import GraspingPolicy
 try:
     import rospy
     import tf
     from baxter_interface import gripper as baxter_gripper
-    from path_planner import PathPlanner
+    #from path_planner import PathPlanner
     ros_enabled = True
     from geometry_msgs.msg import PoseStamped
 except:
@@ -188,11 +189,11 @@ def parse_args():
     Pretty self explanatory tbh
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-obj', type=str, default='gearbox', help=
+    parser.add_argument('-obj', type=str, default='pawn', help=
         """Which Object you\'re trying to pick up.  Options: gearbox, nozzle, pawn.
         Default: gearbox"""
     )
-    parser.add_argument('-n_vert', type=int, default=1000, help=
+    parser.add_argument('-n_vert', type=int, default=10, help=
         'How many vertices you want to sample on the object surface.  Default: 1000'
     )
     parser.add_argument('-n_facets', type=int, default=32, help=
@@ -222,20 +223,56 @@ def parse_args():
     return parser.parse_args()
 
 if __name__ == '__main__':
-    args = parse_args()
+    print('\n--------------------------------------')
+    print('starting main.py')
+    print('--------------------------------------\n')
 
-    if args.debug:
-        np.random.seed(0)
+    try:
+        args = parse_args()
 
-    print('starting main')
-    rospy.init_node('main_node')
+        if args.debug:
+            np.random.seed(0)
 
+        rospy.init_node('main_node')
 
-    # Mesh loading and pre-processing
-    mesh = trimesh.load_mesh('objects/{}.obj'.format(args.obj))
-    
+        # load and pre-process mesh
+        filename = 'obj/{}.obj'.format(args.obj)
+        print('loading mesh {}...\n'.format(filename))
+        mesh = trimesh.load_mesh(filename)
+        mesh.fix_normals()
 
-    
+        # visualize the mesh
+        print('visualizing mesh (close visualizer window to continue)...\n')
+        utils.visualize_mesh(mesh)
+
+       # grasping policies
+        '''
+        print('initializing grasping policy...\n')
+        grasping_policy = GraspingPolicy(
+            args.n_vert,
+            args.n_grasps,
+            args.n_execute,
+            args.n_facets,
+            args.metric
+        )
+        '''
+
+        # sample the vertices
+        print('sampling vertices...\n')
+        vertices, ids = trimesh.sample.sample_surface_even(mesh, 10)
+        normals = mesh.face_normals[ids]
+        normals = -1 * normals;
+
+        utils.visualize_vertices(mesh, vertices)
+        utils.visualize_normals(mesh, vertices, normals)
+
+        metrics = utils.compute_metrics(mesh, vertices, normals)
+        utils.visualize_metrics(mesh, vertices, normals, metrics)
+
+    except rospy.ROSInterruptException:
+        pass
+
+    '''
     #mesh.apply_transform(T_world_obj.matrix)
     mesh.fix_normals()
 
@@ -284,3 +321,4 @@ if __name__ == '__main__':
 
     else:
         T_grasp_worlds = grasping_policy.top_n_actions(mesh, args.obj)
+    '''

@@ -11,15 +11,13 @@ import trimesh
 from visualization import Visualizer3D as vis3d
 import random
 import matplotlib.pyplot as plt
-
-# 106B lab imports
-from lab2.metrics import (
+from grasp_metrics import (
     compute_force_closure,
     compute_gravity_resistance,
     compute_custom_metric,
     robust_force_closure
 )
-from lab2.utils import length, normalize, rotation_3d
+from utils import length, normalize, rotation_3d
 
 
 MAX_HAND_DISTANCE = 0.085
@@ -28,10 +26,7 @@ CONTACT_MU = 0.5
 CONTACT_GAMMA = 0.1
 finger_length = 0.1
 
-
-# TODO
 OBJECT_MASS = {'gearbox': .25, 'nozzle': .25, 'pawn': .25}
-
 
 class GraspingPolicy():
     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
@@ -454,6 +449,8 @@ class GraspingPolicy():
         # vertices, ids = trimesh.sample.sample_surface_even(mesh, self.n_vert)
         # convex_hull = trimesh.convex.convex_hull(mesh)
         # intersection = trimesh.boolean.intersection([mesh, convex_hull], engine='scad')
+
+        print('COMPUTING THE TOP N ACTIONS.')
 
         ## computing vertices ##
         print('SAMPLING VERTICES')
