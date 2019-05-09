@@ -12,6 +12,10 @@ if __name__ == '__main__':
     print('Visualizing {}'.format(sys.argv[1]))
     pawn = trimesh.load(sys.argv[1])
 
+    trimesh.smoothing.filter_laplacian(pawn, lamb=0.17)
+
     pawn.fix_normals()
+
+    trimesh.exchange.export.export_mesh(pawn, sys.argv[1][:-4]+'_cleaned.obj')
 
     pawn.show()

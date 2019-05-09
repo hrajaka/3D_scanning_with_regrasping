@@ -12,6 +12,13 @@
 #include <pcl/features/fpfh.h>
 #include <pcl/registration/ia_ransac.h>
 
+#include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/io/obj_io.h>
+
+
 class FeatureCloud
 {
   public:
@@ -278,9 +285,12 @@ main (int argc, char **argv)
   // pcl::io::savePCDFileBinary (argv[3], source_cloud_transformed);
 
   // Save also the merged point clouds
-  pcl::PointCloud<pcl::PointXYZ> merged_point_cloud = *source_cloud.getPointCloud();
-  merged_point_cloud += source_cloud_transformed;
-  pcl::io::savePCDFileBinary (argv[3], merged_point_cloud);
+  pcl::PointCloud<pcl::PointXYZ>::Ptr merged_point_cloud = target_cloud.getPointCloud();
+  *merged_point_cloud += source_cloud_transformed;
+  pcl::io::savePCDFileBinary (argv[3], *merged_point_cloud);
+
+
+
 
   return (0);
 }
