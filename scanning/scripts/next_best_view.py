@@ -1,3 +1,5 @@
+#!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/local/bin/python
+
 import matplotlib.pyplot as plt
 import numpy as np
 import autolab_core
@@ -5,6 +7,7 @@ import trimesh
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.spatial
 import matplotlib.path
+import sys
 
 from kin_func_skeleton import rotation_3d
 

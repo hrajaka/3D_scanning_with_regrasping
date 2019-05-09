@@ -154,9 +154,9 @@ int
  main (int argc, char** argv)
 {
 
-  if (argc != 6)
+  if (argc != 5)
   {
-    std::cout << "Please provide a filename for input object file, input background file, cleaned file, isolated file and obj file" << std::endl;
+    std::cout << "Please provide a filename for input object file, input background file, cleaned file, isolated file" << std::endl;
     return -1;
   }
   // Creating the viewer, writer and useful point clouds //
@@ -182,8 +182,8 @@ int
 
   // Removing background and saving
   std::cout << "\nRemoving background" << std::endl;
-  // object_isolated = background_removal(background, object_cleaned);
-  // writer.write<pcl::PointXYZ> (argv[4], *object_isolated, false);
+  object_isolated = background_removal(background, object_cleaned);
+  writer.write<pcl::PointXYZ> (argv[4], *object_isolated, false);
 
   // viewer->addPointCloud(object_isolated, "cloud");
   // while (!viewer->wasStopped ())
@@ -191,12 +191,10 @@ int
   //   viewer->spinOnce (100);
   // }
 
-  pcl::io::loadPCDFile (argv[4], *object_isolated);
-
-  // Generating the obj file and saving
-  std::cout << "\nGenerating obj file" << std::endl;
-  pcl::PolygonMesh mesh = generate_mesh(argv[4]);
-  pcl::io::saveOBJFile (argv[5], mesh);
+  // // Generating the obj file and saving
+  // std::cout << "\nGenerating obj file" << std::endl;
+  // pcl::PolygonMesh mesh = generate_mesh(argv[4]);
+  // pcl::io::saveOBJFile (argv[5], mesh);
 
 
   return (0);
