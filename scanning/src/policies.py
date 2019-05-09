@@ -29,6 +29,25 @@ finger_length = 0.1
 OBJECT_MASS = {'gearbox': .25, 'nozzle': .25, 'pawn': .25}
 
 class GraspingPolicy():
+    def __init__(self, n_vert, n_grasps, n_execute):
+        """
+        Parameters
+        ----------
+        n_vert : int
+            We are sampling vertices on the surface of the object, and will use pairs of
+            these vertices as grasp candidates
+        n_grasps : int
+            how many grasps to sample.  Each grasp is a pair of vertices
+        n_execute : int
+            how many grasps to return in policy.action()
+        """
+        self.n_vert = n_vert
+        self.n_grasps = n_grasps
+        self.n_execute = n_execute
+
+    
+
+class GraspingPolicy_old():
     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
         """
         Parameters
