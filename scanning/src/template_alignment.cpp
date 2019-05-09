@@ -12,6 +12,13 @@
 #include <pcl/features/fpfh.h>
 #include <pcl/registration/ia_ransac.h>
 
+#include <pcl/surface/vtk_smoothing/vtk_mesh_smoothing_laplacian.h>
+#include <pcl/kdtree/kdtree_flann.h>
+#include <pcl/features/normal_3d.h>
+#include <pcl/surface/gp3.h>
+#include <pcl/io/obj_io.h>
+
+
 class FeatureCloud
 {
   public:
@@ -225,7 +232,7 @@ main (int argc, char **argv)
 {
   if (argc != 4)
   {
-    std::cout << "Provide filename for source cloud, for target cloud and output cloud" << std::endl;
+    std::cout << "Provide filename for source cloud, for target cloud and merged cloud" << std::endl;
     return (-1);
   }
 
@@ -241,9 +248,9 @@ main (int argc, char **argv)
   pcl::VoxelGrid<pcl::PointXYZ> vox_grid;
   vox_grid.setInputCloud (cloud);
   vox_grid.setLeafSize (voxel_grid_size, voxel_grid_size, voxel_grid_size);
-  pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud (new pcl::PointCloud<pcl::PointXYZ>); 
+  pcl::PointCloud<pcl::PointXYZ>::Ptr tempCloud (new pcl::PointCloud<pcl::PointXYZ>);
   vox_grid.filter (*tempCloud);
-  cloud = tempCloud; 
+  cloud = tempCloud;
 
   // Assign to the target FeatureCloud
   FeatureCloud target_cloud;
@@ -272,10 +279,18 @@ main (int argc, char **argv)
   printf ("\n");
   printf ("t = < %0.3f, %0.3f, %0.3f >\n", translation (0), translation (1), translation (2));
 
-  // Save the aligned template for visualization
+  // // Save the aligned template for visualization
   pcl::PointCloud<pcl::PointXYZ> source_cloud_transformed;
   pcl::transformPointCloud (*source_cloud.getPointCloud (), source_cloud_transformed, best_alignment.final_transformation);
-  pcl::io::savePCDFileBinary (argv[3], source_cloud_transformed);
+  // pcl::io::savePCDFileBinary (argv[3], source_cloud_transformed);
+
+  // Save also the merged point clouds
+  pcl::PointCloud<pcl::PointXYZ>::Ptr merged_point_cloud = target_cloud.getPointCloud();
+  *merged_point_cloud += source_cloud_transformed;
+  pcl::io::savePCDFileBinary (argv[3], *merged_point_cloud);
+
+
+
 
   return (0);
 }
