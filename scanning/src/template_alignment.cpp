@@ -273,12 +273,12 @@ main (int argc, char **argv)
   printf ("t = < %0.3f, %0.3f, %0.3f >\n", translation (0), translation (1), translation (2));
 
   // // Save the aligned template for visualization
-  // pcl::PointCloud<pcl::PointXYZ> source_cloud_transformed;
-  // pcl::transformPointCloud (*source_cloud.getPointCloud (), source_cloud_transformed, best_alignment.final_transformation);
+  pcl::PointCloud<pcl::PointXYZ> source_cloud_transformed;
+  pcl::transformPointCloud (*source_cloud.getPointCloud (), source_cloud_transformed, best_alignment.final_transformation);
   // pcl::io::savePCDFileBinary (argv[3], source_cloud_transformed);
 
   // Save also the merged point clouds
-  PointCloud merged_point_cloud = target_cloud;
+  pcl::PointCloud<pcl::PointXYZ> merged_point_cloud = *source_cloud.getPointCloud();
   merged_point_cloud += source_cloud_transformed;
   pcl::io::savePCDFileBinary (argv[3], merged_point_cloud);
 
