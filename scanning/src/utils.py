@@ -17,15 +17,25 @@ try:
 except:
     ros_enabled = False
 
-def visualize_mesh(mesh, T_ar_cam, T_obj_cam):
-    camera_frame = RigidTransform()
+def visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam):
+    T_cam_cam = RigidTransform()
+
+    T_cam_ar = T_ar_cam.inverse()
+    p_ar = np.array([0, 0, 0, 1])
+    p_cam = np.matmul(T_cam_ar.matrix, p_ar)[:3]
+
+    Twc = np.matmul(T_world_ar.matrix, T_ar_cam.matrix)
+    T_world_cam = RigidTransform(Twc[:3, :3], Twc[:3, 3])
 
     vis3d.mesh(mesh)
-    vis3d.pose(camera_frame, alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    vis3d.pose(T_ar_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    vis3d.table(T_ar_cam)
-    vis3d.pose(T_obj_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+    vis3d.pose(T_cam_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.pose(T_ar_cam.inverse(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.points(p_cam, color=(1, 0, 1), scale=0.003)
+    #vis3d.table(T_ar_cam)
+    vis3d.pose(T_world_cam.inverse(), alpha=0.05, tube_radius=0.001, center_scale=0.002)
+    #vis3d.table(T_world_cam)
+    #vis3d.pose(T_obj_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    #vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
     vis3d.show()
 
 def visualize_vertices(mesh, vertices):

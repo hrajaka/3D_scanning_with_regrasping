@@ -1,8 +1,8 @@
+#!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
 
 #!/home/hasithr/virtualenv/env/bin/python
 
-#!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
 
 """
@@ -254,9 +254,14 @@ if __name__ == '__main__':
 
         rospy.init_node('main_node')
 
+        print('Getting transform from robot to AR tag...\n')
+        T_world_ar = lookup_transform('ar_marker_0', 'base')
 
         print('Getting transform from camera to AR tag...\n')
-        T_ar_cam = lookup_transform('ar_marker_0', 'camera_depth_optical_frame')
+        T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
+        print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
+        T_ar_cam.from_frame = 'ar_marker_0'
+        print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
 
         ## Load and pre-process mesh ##
         filename = 'point_clouds/obj/{}.obj'.format(args.obj)
@@ -269,7 +274,7 @@ if __name__ == '__main__':
 
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
-        utils.visualize_mesh(mesh, T_ar_cam, T_obj_cam)
+        utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
 
         print('centroid: ')
         print(mesh.centroid)
