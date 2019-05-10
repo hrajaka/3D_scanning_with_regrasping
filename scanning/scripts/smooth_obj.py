@@ -16,6 +16,6 @@ if __name__ == '__main__':
 
     pawn.fix_normals()
 
-    trimesh.exchange.export.export_mesh(pawn, sys.argv[1][:-4]+'_cleaned.obj')
+    trimesh.exchange.export.export_mesh(pawn, sys.argv[1][:-4]+'_smoothed.obj')
 
     pawn.show()
