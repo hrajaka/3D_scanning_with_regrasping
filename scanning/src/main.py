@@ -1,4 +1,7 @@
+#!/home/hasithr/virtualenv/env/bin/python
+
 #!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
+
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
 
 """
@@ -16,8 +19,6 @@ import warnings
 import utils
 warnings.simplefilter("ignore", DeprecationWarning)
 
-
-
 # 106B lab imports
 from policies import GraspingPolicy
 try:
@@ -25,8 +26,8 @@ try:
     import tf
     from baxter_interface import gripper as baxter_gripper
     #from path_planner import PathPlanner
-    ros_enabled = True
     from geometry_msgs.msg import PoseStamped
+    ros_enabled = True
 except:
     print 'Couldn\'t import ROS.  I assume you\'re running this on your laptop'
     ros_enabled = False
@@ -246,29 +247,33 @@ if __name__ == '__main__':
         utils.visualize_mesh(mesh)
 
        # grasping policies
-        '''
+        
         print('initializing grasping policy...\n')
         grasping_policy = GraspingPolicy(
             args.n_vert,
             args.n_grasps,
             args.n_execute,
-            args.n_facets,
-            args.metric
         )
-        '''
+        
 
         # sample the vertices
         print('sampling vertices...\n')
-        vertices, ids = trimesh.sample.sample_surface_even(mesh, 10)
+        '''
+        vertices, ids = trimesh.sample.sample_surface_even(mesh, 100)
         normals = mesh.face_normals[ids]
         normals = -1 * normals;
-
-        utils.visualize_vertices(mesh, vertices)
+        '''
+        vertices, normals = grasping_policy.sample_normals(mesh)
         utils.visualize_normals(mesh, vertices, normals)
 
-        metrics = utils.compute_metrics(mesh, vertices, normals)
+        metrics = grasping_policy.compute_metrics(
+            mesh, vertices, normals)
         utils.visualize_metrics(mesh, vertices, normals, metrics)
 
+        grasp_vertices = grasping_policy.grasp_vertices(
+            vertices, normals)
+        utils.visualize_grasps(mesh, grasp_vertices, metrics)
+        
     except rospy.ROSInterruptException:
         pass
 
