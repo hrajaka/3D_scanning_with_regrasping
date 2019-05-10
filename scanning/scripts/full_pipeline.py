@@ -17,13 +17,16 @@ import os
 
 if __name__ == '__main__':
 
+	## Manually run this in some terminal: roslaunch scanning test_ar.launch ##
+
 	## Record a point cloud for the table ##
-	raw_input("Press enter to record empty scene")
-	#TODO record empty scene and store it as 'empty.pcd'
+	raw_input("Press enter to record empty scene (and Ctrl+C when done)")	
+	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=empty")  
+
 
 	## Record a point cloud for the first view ##
-	raw_input("Press enter to record object scene")
-	#TODO record object scene and store it as 'object0.pcd'
+	raw_input("Press enter to record object scene (and Ctrl+C when done)")
+	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object0")  
 
 	## Clean the scenes and isolate them ##
 	#os.system("rosrun scanning processing_pipeline object0.pcd scene.pcd object0_clean.pcd object0_isolated.pcd")  
@@ -41,8 +44,8 @@ if __name__ == '__main__':
 	#########
 
 	## Record a point cloud for the second view ##
-	raw_input("Press enter to record object scene")
-	#TODO record object scene and store it as 'object1.pcd'
+	raw_input("Press enter to record object scene (and Ctrl+C when done)")
+	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object1")  
 
 	## Clean the scenes and isolate them ##
 	os.system("rosrun scanning processing_pipeline object1.pcd scene.pcd object1_clean.pcd object1_isolated.pcd") 
@@ -62,8 +65,8 @@ if __name__ == '__main__':
 	#########
 
 	## Record a point cloud for the third view ##
-	raw_input("Press enter to record object scene")
-	#TODO record object scene and store it as 'object2.pcd'
+	raw_input("Press enter to record object scene (and Ctrl+C when done)")
+	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object2")  
 
 	## Clean the scenes and isolate them ##
 	os.system("rosrun scanning processing_pipeline object2.pcd scene.pcd object2_clean.pcd object2_isolated.pcd") 
