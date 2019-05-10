@@ -1,0 +1,31 @@
+<launch>
+
+ <arg name="marker_size" default="7.3" />
+ <arg name="max_new_marker_error" default="0.08" />
+ <arg name="max_track_error" default="0.2" />
+ <arg name="cam_image_topic" default="/camera/color/image_raw" />
+ <arg name="cam_info_topic" default="/camera/color/camera_info" />
+ <arg name="output_frame" default="/camera_link" />
+ <arg name="serial_no_camera1" default="827312070228" />
+ <arg name="baxter_cam_image_topic" default="/cameras/left_hand_camera/image" />
+ <arg name="baxter_cam_info_topic" default="/cameras/left_hand_camera/camera_info" />
+ <arg name="baxter_output_frame" default="/left_hand_camera" />
+
+ <!-- Launch baxter camera node -->
+ <node pkg="baxter_tools" name="camera_control" type="camera_control.py" output="screen" args="-o left_hand_camera -r 1280x800" />
+
+ <!-- Launch realsense node -->
+ <include file="$(find realsense2_camera)/launch/rs_camera.launch">
+      <arg name="serial_no"                value="$(arg serial_no_camera1)"/>
+      <arg name="filters"                value="spatial,temporal,decimation,pointcloud,disparity"/>
+      <arg name="align_depth"         default="true"/>
+ </include>
+
+
+ <!-- Launch AR tracking for baxter -->
+  <node name="ar_track_alvar_left_hand" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg baxter_cam_image_topic) $(arg baxter_cam_info_topic) $(arg baxter_output_frame)" />
+
+ <!-- Launch AR tag node for realsense -->
+  <node name="ar_track_alvar" pkg="ar_track_alvar" type="individualMarkersNoKinect2" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame)" />
+
+</launch>
