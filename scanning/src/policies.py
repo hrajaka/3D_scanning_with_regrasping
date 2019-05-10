@@ -108,6 +108,154 @@ class GraspingPolicy():
         # it means all approach directions will bump with part 
         return -1
 
+    def vertices_to_baxter_hand_pose(self, grasp_vertices, approach_direction, obj_name):
+        """
+        takes the contacts positions in the object frame and returns the hand pose T_obj_gripper
+        BE CAREFUL ABOUT THE FROM FRAME AND TO FRAME.  the RigidTransform class' frames are
+        weird.
+
+        Parameters
+        ----------
+        grasp_vertices : 2x3 :obj:`numpy.ndarray`
+            position of the fingers in object frame
+        approach_direction : 3x' :obj:`numpy.ndarray`
+            there are multiple grasps that go through contact1 and contact2.  This describes which
+            orientation the hand should be in
+
+        Returns
+        -------
+        :obj:`autolab_core:RigidTransform` Hand pose in the object frame
+        """
+        # parameters required to create a autolab_core:RigidTransform:
+        # - rotation (aka 3x3 rotation matrix)
+        # - translation (aka 3x1 vector)
+        # - from_frame (aka str)
+        # - to_frame (aka str)
+        
+        midpoint = (grasp_vertices[0] + grasp_vertices[1]) / 2
+
+        gripper_half_width = MAX_HAND_DISTANCE / 2
+        
+        z = normalize(approach_direction)
+        y = normalize(grasp_vertices[0] - grasp_vertices[1])
+        x = np.cross(y, z)
+
+        rot_mat_opposite = np.array([x, y, z]).T
+        p_opposite = midpoint
+
+        rot_mat = rot_mat_opposite.T
+        p = - np.matmul(rot_mat_opposite.T, p_opposite)
+
+        rigid_trans = RigidTransform(rot_mat_opposite, p_opposite, to_frame='right_gripper', from_frame=obj_name) 
+
+        return rigid_trans
+
+
+
+    def vis_transform(self, mesh, G_transform, vertices):
+        """
+        Pass in any grasp and its associated grasp quality.  this function will plot
+        each grasp on the object and plot the grasps as a bar between the points, with
+        colored dots on the line endpoints representing the grasp quality associated
+        with each grasp
+
+        Parameters
+        ----------
+        mesh : :obj:`Trimesh`
+        grasp_vertices : mx2x3 :obj:`numpy.ndarray`
+            m grasps.  Each grasp containts two contact points.  Each contact point
+            is a 3 dimensional vector, hence the shape mx2x3
+        grasp_qualities : mx' :obj:`numpy.ndarray`
+            vector of grasp qualities for each grasp
+        """
+        L = MAX_HAND_DISTANCE / 2 # gripper half width
+
+        # transform from gripper to contact 1
+        G_gc1 = np.array([[1,  0,  0,    0],
+                         [0,  0,  1, -1*L],
+                         [0, -1,  0,    0],
+                         [0,  0,  0,    1]])
+
+        # transform from gripper to contact 2
+        G_gc2 = np.array([[1,  0,  0,    0],
+                         [0,  0, -1,    L],
+                         [0,  1,  0,    0],
+                         [0,  0,  0,    1]])
+
+        G = G_transform.matrix
+
+        print('G')
+        print(G)
+
+        G_oc1 = np.matmul(G, G_gc1)
+        G_oc2 = np.matmul(G, G_gc2)
+
+
+        scale = 0.01
+        o = np.array([0, 0, 0, 1])
+        x = np.array([scale, 0, 0, 1])
+        y = np.array([0, scale, 0, 1])
+        z = np.array([0, 0, scale, 1])
+
+        ot = np.matmul(G, o)
+        xt = np.matmul(G, x)
+        yt = np.matmul(G, y)
+        zt = np.matmul(G, z)
+
+
+        o1 = np.matmul(G_oc1, o)
+        x1 = np.matmul(G_oc1, x)
+        y1 = np.matmul(G_oc1, y)
+        z1 = np.matmul(G_oc1, z)
+
+        o2 = np.matmul(G_oc2, o)
+        x2 = np.matmul(G_oc2, x)
+        y2 = np.matmul(G_oc2, y)
+        z2 = np.matmul(G_oc2, z)
+
+        vis3d.mesh(mesh, style='wireframe')
+
+
+        
+        #Plot origin axes
+        x_axis = np.array([o, x])[:, :3]
+        y_axis = np.array([o, y])[:, :3]
+        z_axis = np.array([o, z])[:, :3]
+
+        x_axis_t = np.array([ot, xt])[:, :3]
+        y_axis_t = np.array([ot, yt])[:, :3]
+        z_axis_t = np.array([ot, zt])[:, :3]
+
+        x_axis_1 = np.array([o1, x1])[:, :3]
+        y_axis_1 = np.array([o1, y1])[:, :3]
+        z_axis_1 = np.array([o1, z1])[:, :3]
+
+        x_axis_2 = np.array([o2, x2])[:, :3]
+        y_axis_2 = np.array([o2, y2])[:, :3]
+        z_axis_2 = np.array([o2, z2])[:, :3]
+
+
+        vis3d.plot3d(x_axis, color=(0.5,0,0), tube_radius=0.001)
+        vis3d.plot3d(y_axis, color=(0,0.5,0), tube_radius=0.001)
+        vis3d.plot3d(z_axis, color=(0,0,0.5), tube_radius=0.001)
+
+        vis3d.plot3d(x_axis_t, color=(255,0,0), tube_radius=0.001)
+        vis3d.plot3d(y_axis_t, color=(0,255,0), tube_radius=0.001)
+        vis3d.plot3d(z_axis_t, color=(0,0,255), tube_radius=0.001)
+
+        vis3d.plot3d(x_axis_1, color=(255,0,0), tube_radius=0.001)
+        vis3d.plot3d(y_axis_1, color=(0,255,0), tube_radius=0.001)
+        vis3d.plot3d(z_axis_1, color=(0,0,255), tube_radius=0.001)
+
+        vis3d.plot3d(x_axis_2, color=(255,0,0), tube_radius=0.001)
+        vis3d.plot3d(y_axis_2, color=(0,255,0), tube_radius=0.001)
+        vis3d.plot3d(z_axis_2, color=(0,0,255), tube_radius=0.001)
+
+        vis3d.points(vertices[0], scale=0.003)
+        vis3d.points(vertices[1], scale=0.003)
+
+        vis3d.show()
+
 class GraspingPolicy_old():
     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
         """

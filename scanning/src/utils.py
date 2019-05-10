@@ -36,6 +36,10 @@ def visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam):
     #vis3d.table(T_world_cam)
     #vis3d.pose(T_obj_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
     #vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
+
+    
+
+
     vis3d.show()
 
 def visualize_vertices(mesh, vertices):

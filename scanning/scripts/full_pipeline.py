@@ -21,34 +21,37 @@ if __name__ == '__main__':
 
 	## Record a point cloud for the table ##
 	raw_input("Press enter to record empty scene (and Ctrl+C when done)")	
-	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=empty")  
-
+	# os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=scene")  
 
 	## Record a point cloud for the first view ##
 	raw_input("Press enter to record object scene (and Ctrl+C when done)")
-	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object0")  
+	# os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object0")  
 
 	## Clean the scenes and isolate them ##
-	#os.system("rosrun scanning processing_pipeline object0.pcd scene.pcd object0_clean.pcd object0_isolated.pcd")  
+	# os.system("rosrun scanning processing_pipeline object0.pcd scene.pcd object0_clean.pcd object0_isolated.pcd")  
+
+	os.system("pcl_viewer -ps 2 -fc 255,255,255 object0_isolated.pcd")  
+
 
 	## Generate obj file for the object ##
 	os.system("rosrun scanning generate_mesh object0_isolated.pcd object0.obj")  
 
-	'''
 	## Find the next best view ##
 	os.system("rosrun scanning next_best_view.py")  
 
 	## Generate a grasp, the target pose and execute the motion ##
-	#TODO 
+	os.system("rosrun scanning main.py -obj object0")   
 
 	#########
 
 	## Record a point cloud for the second view ##
 	raw_input("Press enter to record object scene (and Ctrl+C when done)")
-	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object1")  
+	# os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object1")  
 
 	## Clean the scenes and isolate them ##
-	os.system("rosrun scanning processing_pipeline object1.pcd scene.pcd object1_clean.pcd object1_isolated.pcd") 
+	# os.system("rosrun scanning processing_pipeline object1.pcd scene.pcd object1_clean.pcd object1_isolated.pcd") 
+
+	os.system("pcl_viewer -ps 2 -fc 255,255,255 object1_isolated.pcd")  
 
 	## Merge the two point clouds ##
 	os.system("rosrun scanning template_alignment object1_isolated.pcd object0_isolated.pcd merged0.pcd") 
@@ -62,14 +65,21 @@ if __name__ == '__main__':
 	## Generate a pcd file from the smoothed obj file ##
 	os.system("rosrun scanning obj2pcd merged0_smoothed.obj merged0_smoothed.pcd")  
 
+'''
+
+	os.system("rosrun scanning main.py -obj merged0_smoothed")   
+
 	#########
 
 	## Record a point cloud for the third view ##
 	raw_input("Press enter to record object scene (and Ctrl+C when done)")
-	os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object2")  
+	# os.system("rosrun scanning record_one_point_cloud input:=/camera/depth/color/points _prefix:=object2")  
 
 	## Clean the scenes and isolate them ##
-	os.system("rosrun scanning processing_pipeline object2.pcd scene.pcd object2_clean.pcd object2_isolated.pcd") 
+	# os.system("rosrun scanning processing_pipeline object2.pcd scene.pcd object2_clean.pcd object2_isolated.pcd") 
+
+	os.system("pcl_viewer -ps 2 -fc 255,255,255 object2_isolated.pcd")  
+
 
 	## Merge the two point clouds ##
 	os.system("rosrun scanning template_alignment object2_isolated.pcd merged0_smoothed.pcd merged1.pcd") 
@@ -82,7 +92,9 @@ if __name__ == '__main__':
 
 	## Generate a pcd file from the smoothed obj file ##
 	os.system("rosrun scanning obj2pcd merged1_smoothed.obj merged1_smoothed.pcd")  
-'''
-	#########
 
+'''
+
+	#########
+	
 	

@@ -1,5 +1,5 @@
-#!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
+#!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
 #!/home/hasithr/virtualenv/env/bin/python
 
@@ -28,7 +28,7 @@ try:
     import rospy
     import tf
     from baxter_interface import gripper as baxter_gripper
-    #from path_planner import PathPlanner
+    from path_planner import PathPlanner
     from geometry_msgs.msg import PoseStamped
     ros_enabled = True
 except:
@@ -211,7 +211,7 @@ def parse_args():
         """Which Object you\'re trying to pick up.  Options: gearbox, nozzle, pawn.
         Default: gearbox"""
     )
-    parser.add_argument('-n_vert', type=int, default=10, help=
+    parser.add_argument('-n_vert', type=int, default=100, help=
         'How many vertices you want to sample on the object surface.  Default: 1000'
     )
     parser.add_argument('-n_facets', type=int, default=32, help=
@@ -256,15 +256,19 @@ if __name__ == '__main__':
 
         print('Getting transform from robot to AR tag...\n')
         T_world_ar = lookup_transform('ar_marker_0', 'base')
+        print(T_world_ar)
+
 
         print('Getting transform from camera to AR tag...\n')
         T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
-        print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
+        # print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
         T_ar_cam.from_frame = 'ar_marker_0'
-        print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
+        # print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
+        print(T_ar_cam)
+
 
         ## Load and pre-process mesh ##
-        filename = 'point_clouds/obj/{}.obj'.format(args.obj)
+        filename = '{}.obj'.format(args.obj)
         print('Loading mesh {}...\n'.format(filename))
 
         mesh = trimesh.load_mesh(filename)
@@ -274,7 +278,7 @@ if __name__ == '__main__':
 
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
-        utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
+        #utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
 
         print('centroid: ')
         print(mesh.centroid)
@@ -293,8 +297,8 @@ if __name__ == '__main__':
         # sample the vertices
         print('sampling vertices...\n')
         vertices, normals = grasping_policy.sample_normals(mesh)
-        utils.visualize_normals(mesh, vertices, normals)
-
+        #utils.visualize_normals(mesh, vertices, normals)
+        raw_input('Press ENTER to visualize grasp')
         metrics = grasping_policy.compute_metrics(mesh, vertices, normals)
         utils.visualize_metrics(mesh, vertices, normals, metrics)
         
@@ -315,25 +319,36 @@ if __name__ == '__main__':
 
         approach_direction = grasping_policy.compute_approach_direction(mesh, contact_vertices)
 
+
+        approach_direction = - approach_direction
         print('approach direction:')
         print(approach_direction.shape)
         print(approach_direction)
-        '''
-        T_obj_grasp = vertices_to_baxter_hand_pose(contact_vertices, approach_direction, args.obj)
-        vis_transform(mesh, T_obj_grasp, contact_vertices)
-     
+        
+        T_obj_grasp = grasping_policy.vertices_to_baxter_hand_pose(contact_vertices, approach_direction, args.obj)
+        grasping_policy.vis_transform(mesh, T_obj_grasp, contact_vertices)
+        
 
         ## Generate gripper pose in world frame ##
         print('Generating gripper pose in world frame...\n')
-        T_world_obj = lookup_transform(args.obj)
-        T_wo = T_world_obj.matrix
+        T_wo = np.matmul(np.matmul(T_world_ar.matrix, T_ar_cam.matrix), T_obj_cam.inverse().matrix) 
         T_og = T_obj_grasp.matrix
         T_wg = np.matmul(T_wo, T_og)
+        print(T_wg)
 
+        
         T_world_grasp = RigidTransform(T_wg[:3, :3], T_wg[:3, 3], 'world', 'gripper')
 
-        execute_grasp(T_world_grasp, planner, gripper)
-        '''
+
+        ## 
+
+        # gripper = baxter_gripper.Gripper('right')
+        # gripper.calibrate()
+        # planner = PathPlanner('{}_arm'.format('right'))
+
+
+        # execute_grasp(T_world_grasp, planner, gripper)
+        
     except rospy.ROSInterruptException:
         pass
 

@@ -160,7 +160,7 @@ int
     return -1;
   }
   // Creating the viewer, writer and useful point clouds //
-  pcl::visualization::PCLVisualizer *viewer (new pcl::visualization::PCLVisualizer());
+  // pcl::visualization::PCLVisualizer *viewer (new pcl::visualization::PCLVisualizer());
   pcl::PCDWriter writer;
   pcl::PointCloud<pcl::PointXYZ>::Ptr object (new pcl::PointCloud<pcl::PointXYZ>);
   pcl::PointCloud<pcl::PointXYZ>::Ptr background (new pcl::PointCloud<pcl::PointXYZ>);
