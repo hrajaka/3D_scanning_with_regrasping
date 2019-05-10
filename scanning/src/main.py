@@ -1,8 +1,9 @@
+#!/home/hasithr/virtualenv/env/bin/python
+
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
 
 #!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
-#!/home/hasithr/virtualenv/env/bin/python
 
 """
 Starter script for EE106B grasp planning lab
@@ -484,12 +485,6 @@ if __name__ == '__main__':
         print('Visualizing mesh (close visualizer window to continue)...\n')
         utils.visualize_mesh(mesh)
 
-<<<<<<< HEAD
-
-        ## Sample the vertices ##
-        print('Sampling vertices...\n')
-        vertices, ids = trimesh.sample.sample_surface_even(mesh, 10)
-=======
        # grasping policies
         
         print('initializing grasping policy...\n')
@@ -502,12 +497,6 @@ if __name__ == '__main__':
 
         # sample the vertices
         print('sampling vertices...\n')
-        '''
-        vertices, ids = trimesh.sample.sample_surface_even(mesh, 100)
->>>>>>> 3cd2eea8de2d18658e82d08b75280b255ec6ca8b
-        normals = mesh.face_normals[ids]
-        normals = -1 * normals;
-        '''
         vertices, normals = grasping_policy.sample_normals(mesh)
         utils.visualize_normals(mesh, vertices, normals)
 
