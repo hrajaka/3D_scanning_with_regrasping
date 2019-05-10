@@ -72,7 +72,7 @@ def visualize_grasps(mesh, vertices, metrics):
 
     for v, m in zip(vertices, metrics_normalized):
         vis3d.points(v, color=(1 - m, m, 0), scale=0.001)
-        vis3d.plot3d(v, color=(1 - m, m, 0), tube_radius=0.0001)
+        vis3d.plot3d(v, color=(1 - m, m, 0), tube_radius=0.0003)
 
     vis3d.show()
 

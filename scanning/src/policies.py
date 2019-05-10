@@ -46,10 +46,11 @@ class GraspingPolicy():
         self.n_execute = n_execute
 
     def sample_normals(self, mesh):
-        v, ids = trimesh.sample.sample_surface_even(mesh, self.n_vert)
-        n = mesh.face_normals[ids]
-        n = -1 * n
-        return v, n
+        vertices, ids = trimesh.sample.sample_surface_even(
+            mesh, self.n_vert)
+        normals = mesh.face_normals[ids]
+        normals = -1 * normals
+        return vertices, normals
 
     def compute_metrics(self, mesh, vertices, normals):
         # calculate distance from normal line to centroid
@@ -65,6 +66,44 @@ class GraspingPolicy():
         grasp_vertices[:, 0] = vertices
         grasp_vertices[:, 1] = vertices2
         return grasp_vertices
+    
+    def compute_approach_direction(self, mesh, grasp_vertices):
+
+        ## initalizing stuff ##
+        nb_directions_to_test = 6
+        normal_scale = 0.01
+        plane_normal = normalize(grasp_vertices[0] - grasp_vertices[1])
+    
+        midpoint = (grasp_vertices[0] + grasp_vertices[1]) / 2
+
+        ## generating a certain number of approach directions ##
+        theta = np.pi / nb_directions_to_test
+        rot_mat = rotation_3d(-plane_normal, theta)
+
+        horizontal_direction = normalize(np.cross(plane_normal, np.array([0, 0, 1])))
+        directions_to_test = [horizontal_direction] #these are vectors
+        approach_directions = [np.array([midpoint, midpoint + horizontal_direction * normal_scale])] #these are two points for visualization
+
+        for i in range(nb_directions_to_test-1):
+            directions_to_test.append(normalize(np.matmul(rot_mat, directions_to_test[-1])))
+            approach_directions.append(np.array([midpoint, midpoint + directions_to_test[-1] * normal_scale]) )
+
+        ## computing the palm position for each approach direction ##
+        palm_positions = []
+        for i in range(nb_directions_to_test):
+            palm_positions.append(midpoint + finger_length * directions_to_test[i])
+
+        directions_to_test = [directions_to_test[3], directions_to_test[2], directions_to_test[4], directions_to_test[1], directions_to_test[5], directions_to_test[0]]
+        palm_positions = [palm_positions[3], palm_positions[2], palm_positions[4], palm_positions[1], palm_positions[5], palm_positions[0]]
+
+        ## checking if some approach direction is valid ##
+        for i in range(nb_directions_to_test):
+            if len(trimesh.intersections.mesh_plane(mesh, directions_to_test[i], palm_positions[i])) == 0:
+                # it means the palm won't bump with part
+                return directions_to_test[i]
+        
+        # it means all approach directions will bump with part 
+        return -1
 
 class GraspingPolicy_old():
     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):

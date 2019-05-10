@@ -273,7 +273,12 @@ if __name__ == '__main__':
         grasp_vertices = grasping_policy.grasp_vertices(
             vertices, normals)
         utils.visualize_grasps(mesh, grasp_vertices, metrics)
-        
+
+        approach_dirs = np.empty((vertices.shape[0], 3))
+        for i, g in enumerate(grasp_vertices):
+            a = grasping_policy.compute_approach_direction(mesh, g)
+            approach_dirs[i] = a
+
     except rospy.ROSInterruptException:
         pass
 
