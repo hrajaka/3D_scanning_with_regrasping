@@ -45,7 +45,26 @@ class GraspingPolicy():
         self.n_grasps = n_grasps
         self.n_execute = n_execute
 
-    
+    def sample_normals(self, mesh):
+        v, ids = trimesh.sample.sample_surface_even(mesh, self.n_vert)
+        n = mesh.face_normals[ids]
+        n = -1 * n
+        return v, n
+
+    def compute_metrics(self, mesh, vertices, normals):
+        # calculate distance from normal line to centroid
+        v = np.cross(normals, mesh.centroid - vertices)
+        d = np.linalg.norm(v, axis=1)
+        metrics = -1 * d
+        return metrics
+        
+    # calculate where other finger should go
+    def grasp_vertices(self, vertices, normals):
+        vertices2 = vertices + normals * MIN_HAND_DISTANCE
+        grasp_vertices = np.empty((vertices.shape[0], 2, 3))
+        grasp_vertices[:, 0] = vertices
+        grasp_vertices[:, 1] = vertices2
+        return grasp_vertices
 
 # class GraspingPolicy_old():
 #     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
