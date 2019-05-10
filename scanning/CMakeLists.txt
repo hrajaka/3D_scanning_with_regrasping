@@ -151,6 +151,7 @@ add_executable(visualize_pcd src/visualize_pcd.cpp)
 add_executable(registration src/registration.cpp)
 add_executable(template_alignment src/template_alignment.cpp)
 add_executable(obj2pcd src/obj2pcd.cpp)
+add_executable(record_one_point_cloud src/record_one_point_cloud.cpp)
 
 ## Rename C++ executable without prefix
 ## The above recommended prefix causes long target names, the following renames the
@@ -172,6 +173,7 @@ target_link_libraries(visualize_pcd ${PCL_LIBRARIES})
 target_link_libraries(registration ${PCL_LIBRARIES})
 target_link_libraries(template_alignment ${PCL_LIBRARIES})
 target_link_libraries(obj2pcd ${PCL_LIBRARIES})
+target_link_libraries(record_one_point_cloud ${PCL_LIBRARIES} ${catkin_LIBRARIES})
 
 #############
 ## Install ##
