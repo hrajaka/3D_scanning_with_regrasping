@@ -47,31 +47,31 @@ class GraspingPolicy():
 
     
 
-class GraspingPolicy_old():
-    def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
-        """
-        Parameters
-        ----------
-        n_vert : int
-            We are sampling vertices on the surface of the object, and will use pairs of
-            these vertices as grasp candidates
-        n_grasps : int
-            how many grasps to sample.  Each grasp is a pair of vertices
-        n_execute : int
-            how many grasps to return in policy.action()
-        n_facets : int
-            how many facets should be used to approximate the friction cone between the
-            finger and the object
-        metric_name : string
-            name of one of the function in src/lab2/metrics/metrics.py
-        """
-        self.n_vert = n_vert
-        self.n_grasps = n_grasps
-        self.n_facets = n_facets
-        self.n_execute = n_execute
-        # This is a function, one of the functions in src/lab2/metrics/metrics.py
-        self.metric = eval(metric_name)
-        self.metric_name = metric_name
+# class GraspingPolicy_old():
+#     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
+#         """
+#         Parameters
+#         ----------
+#         n_vert : int
+#             We are sampling vertices on the surface of the object, and will use pairs of
+#             these vertices as grasp candidates
+#         n_grasps : int
+#             how many grasps to sample.  Each grasp is a pair of vertices
+#         n_execute : int
+#             how many grasps to return in policy.action()
+#         n_facets : int
+#             how many facets should be used to approximate the friction cone between the
+#             finger and the object
+#         metric_name : string
+#             name of one of the function in src/lab2/metrics/metrics.py
+#         """
+#         self.n_vert = n_vert
+#         self.n_grasps = n_grasps
+#         self.n_facets = n_facets
+#         self.n_execute = n_execute
+#         # This is a function, one of the functions in src/lab2/metrics/metrics.py
+#         self.metric = eval(metric_name)
+#         self.metric_name = metric_name
 
     def vertices_to_baxter_hand_pose(self, grasp_vertices, approach_direction, obj_name):
         """
@@ -544,143 +544,143 @@ class GraspingPolicy_old():
 
         return hand_poses
     
-    def parameter_sweep(self, mesh, obj_name):
-        print('------------------------')
-        print('RUNNING PARAMETER SWEEP')
-        print('------------------------')
+    # def parameter_sweep(self, mesh, obj_name):
+    #     print('------------------------')
+    #     print('RUNNING PARAMETER SWEEP')
+    #     print('------------------------')
 
-        print('SAMPLING VERTICES')
-        vertices, ids = trimesh.sample.sample_surface_even(mesh, self.n_vert)
-        normals = mesh.face_normals[ids] #face or vertex ????
-        normals = -1 * normals
+    #     print('SAMPLING VERTICES')
+    #     vertices, ids = trimesh.sample.sample_surface_even(mesh, self.n_vert)
+    #     normals = mesh.face_normals[ids] #face or vertex ????
+    #     normals = -1 * normals
 
-        ## sampling some grasps ##
-        print('SAMPLING GRASPS FROM GEARBOX')
+    #     ## sampling some grasps ##
+    #     print('SAMPLING GRASPS FROM GEARBOX')
 
-        grasp_vertices, grasp_normals = self.sample_grasps(vertices, normals)
-        object_mass = OBJECT_MASS[obj_name]
+    #     grasp_vertices, grasp_normals = self.sample_grasps(vertices, normals)
+    #     object_mass = OBJECT_MASS[obj_name]
 
-        print('vertices:')
-        print(grasp_vertices.shape)
+    #     print('vertices:')
+    #     print(grasp_vertices.shape)
 
-        ## computing grasp qualities and finding the n best ##
-        print('COMPUTING GRASP QUALITIES')
-        grasp_qualities = []
+    #     ## computing grasp qualities and finding the n best ##
+    #     print('COMPUTING GRASP QUALITIES')
+    #     grasp_qualities = []
 
-        stds = np.array([0.005, 0.005, 0.1])
-        for i in range(grasp_vertices.shape[0]):
-            if i % 10 == 0:
-                print('testing vertex {} for robust force closure'.format(i))
-            grasp_qualities.append(robust_force_closure(grasp_vertices[i], grasp_normals[i], self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, stds))
-        grasp_qualities = np.array(grasp_qualities)
+    #     stds = np.array([0.005, 0.005, 0.1])
+    #     for i in range(grasp_vertices.shape[0]):
+    #         if i % 10 == 0:
+    #             print('testing vertex {} for robust force closure'.format(i))
+    #         grasp_qualities.append(robust_force_closure(grasp_vertices[i], grasp_normals[i], self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, stds))
+    #     grasp_qualities = np.array(grasp_qualities)
             
 
         
-        v1 = grasp_vertices[:,0,:]
-        v2 = grasp_vertices[:,1,:]
-        q = np.array([grasp_qualities]).T
+    #     v1 = grasp_vertices[:,0,:]
+    #     v2 = grasp_vertices[:,1,:]
+    #     q = np.array([grasp_qualities]).T
         
-        data=np.hstack((v1,v2,q))
-        print('v1x,v1y,v1z,v2x,v2y,v2z,quality')
-        print('data:')
-        print(data.shape)
+    #     data=np.hstack((v1,v2,q))
+    #     print('v1x,v1y,v1z,v2x,v2y,v2z,quality')
+    #     print('data:')
+    #     print(data.shape)
 
-        ind = np.argmax(grasp_qualities)
-        print('index of max: {}'.format(ind))
+    #     ind = np.argmax(grasp_qualities)
+    #     print('index of max: {}'.format(ind))
 
-        best_vertices = grasp_vertices[ind]
-        best_normals = grasp_normals[ind]
-        best_quality = grasp_qualities[ind]
+    #     best_vertices = grasp_vertices[ind]
+    #     best_normals = grasp_normals[ind]
+    #     best_quality = grasp_qualities[ind]
 
-        print('BEST RESULT:')
-        print('vertices:')
-        print(grasp_vertices[ind])
-        print('normals')
-        print(grasp_normals[ind])
-        print('quality')
-        print(grasp_qualities[ind])
+    #     print('BEST RESULT:')
+    #     print('vertices:')
+    #     print(grasp_vertices[ind])
+    #     print('normals')
+    #     print(grasp_normals[ind])
+    #     print('quality')
+    #     print(grasp_qualities[ind])
 
-        best_vertices = grasp_vertices[ind]
-        best_normals = grasp_normals[ind]
-        best_quality = grasp_qualities[ind]
+    #     best_vertices = grasp_vertices[ind]
+    #     best_normals = grasp_normals[ind]
+    #     best_quality = grasp_qualities[ind]
 
-        #EXPERIMENTAL RESULT FOR THIS GRASP
-        SUCCESS_RATE = 0.8
+    #     #EXPERIMENTAL RESULT FOR THIS GRASP
+    #     SUCCESS_RATE = 0.8
 
-        # sweep coefficient of friction
-        num_test_points = 15
-        min_len_test = np.linspace(stds[0]-0.005, stds[0]+0.005, num_test_points)
-        max_len_test = np.linspace(stds[1]-0.005, stds[1]+0.005, num_test_points)
-        mu_test =      np.linspace(stds[2]-0.1, stds[2]+0.1, num_test_points)
+    #     # sweep coefficient of friction
+    #     num_test_points = 15
+    #     min_len_test = np.linspace(stds[0]-0.005, stds[0]+0.005, num_test_points)
+    #     max_len_test = np.linspace(stds[1]-0.005, stds[1]+0.005, num_test_points)
+    #     mu_test =      np.linspace(stds[2]-0.1, stds[2]+0.1, num_test_points)
         
-        new_qualities = []
-        square_errors = []
+    #     new_qualities = []
+    #     square_errors = []
 
-        for mu in mu_test:
-            new_stds = np.array([0.005, 0.005, mu])
-            new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
-            new_qualities.append(new_quality)
-            square_errors.append((SUCCESS_RATE - new_quality) ** 2)
-        new_qualities = np.array(new_qualities)
-        square_errors = np.array(square_errors)
+    #     for mu in mu_test:
+    #         new_stds = np.array([0.005, 0.005, mu])
+    #         new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
+    #         new_qualities.append(new_quality)
+    #         square_errors.append((SUCCESS_RATE - new_quality) ** 2)
+    #     new_qualities = np.array(new_qualities)
+    #     square_errors = np.array(square_errors)
 
-        min_index = np.argmin(square_errors)
-        print('best std of mu: {}'.format(mu_test[min_index]))
+    #     min_index = np.argmin(square_errors)
+    #     print('best std of mu: {}'.format(mu_test[min_index]))
 
-        plt.figure()
-        plt.grid(True)
-        plt.axvline(color='k')
-        plt.axhline(color='k')
-        plt.title('Varying standard deviation of coefficient of friction')
-        plt.xlabel('std of mu')
-        plt.ylabel('square-error')
-        plt.plot(mu_test, square_errors, color='r')
-        #plt.show()
+    #     plt.figure()
+    #     plt.grid(True)
+    #     plt.axvline(color='k')
+    #     plt.axhline(color='k')
+    #     plt.title('Varying standard deviation of coefficient of friction')
+    #     plt.xlabel('std of mu')
+    #     plt.ylabel('square-error')
+    #     plt.plot(mu_test, square_errors, color='r')
+    #     #plt.show()
 
-        new_qualities = []
-        square_errors = []
+    #     new_qualities = []
+    #     square_errors = []
 
-        for m in min_len_test:
-            new_stds = np.array([m, 0.005, 0.1])
-            new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
-            new_qualities.append(new_quality)
-            square_errors.append((SUCCESS_RATE - new_quality) ** 2)
-        new_qualities = np.array(new_qualities)
-        square_errors = np.array(square_errors)
+    #     for m in min_len_test:
+    #         new_stds = np.array([m, 0.005, 0.1])
+    #         new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
+    #         new_qualities.append(new_quality)
+    #         square_errors.append((SUCCESS_RATE - new_quality) ** 2)
+    #     new_qualities = np.array(new_qualities)
+    #     square_errors = np.array(square_errors)
 
-        min_index = np.argmin(square_errors)
-        print('best std of min gripper length: {}'.format(min_len_test[min_index]))
+    #     min_index = np.argmin(square_errors)
+    #     print('best std of min gripper length: {}'.format(min_len_test[min_index]))
 
-        plt.figure()
-        plt.grid(True)
-        plt.axvline(color='k')
-        plt.axhline(color='k')
-        plt.title('Varying standard deviation of min gripper length')
-        plt.xlabel('std of len')
-        plt.ylabel('square-error')
-        plt.plot(min_len_test, square_errors, color='r')
+    #     plt.figure()
+    #     plt.grid(True)
+    #     plt.axvline(color='k')
+    #     plt.axhline(color='k')
+    #     plt.title('Varying standard deviation of min gripper length')
+    #     plt.xlabel('std of len')
+    #     plt.ylabel('square-error')
+    #     plt.plot(min_len_test, square_errors, color='r')
 
-        new_qualities = []
-        square_errors = []
+    #     new_qualities = []
+    #     square_errors = []
 
-        for m in max_len_test:
-            new_stds = np.array([0.005, m, 0.1])
-            new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
-            new_qualities.append(new_quality)
-            square_errors.append((SUCCESS_RATE - new_quality) ** 2)
-        new_qualities = np.array(new_qualities)
-        square_errors = np.array(square_errors)
+    #     for m in max_len_test:
+    #         new_stds = np.array([0.005, m, 0.1])
+    #         new_quality = robust_force_closure(best_vertices, best_normals, self.n_facets, CONTACT_MU, CONTACT_GAMMA, object_mass, MIN_HAND_DISTANCE, MAX_HAND_DISTANCE, new_stds)
+    #         new_qualities.append(new_quality)
+    #         square_errors.append((SUCCESS_RATE - new_quality) ** 2)
+    #     new_qualities = np.array(new_qualities)
+    #     square_errors = np.array(square_errors)
 
-        min_index = np.argmin(square_errors)
-        print('best std of max gripper length: {}'.format(max_len_test[min_index]))
+    #     min_index = np.argmin(square_errors)
+    #     print('best std of max gripper length: {}'.format(max_len_test[min_index]))
 
-        plt.figure()
-        plt.grid(True)
-        plt.axvline(color='k')
-        plt.axhline(color='k')
-        plt.title('Varying standard deviation of max gripper length')
-        plt.xlabel('std of len')
-        plt.ylabel('square-error')
-        plt.plot(min_len_test, square_errors, color='r')
+    #     plt.figure()
+    #     plt.grid(True)
+    #     plt.axvline(color='k')
+    #     plt.axhline(color='k')
+    #     plt.title('Varying standard deviation of max gripper length')
+    #     plt.xlabel('std of len')
+    #     plt.ylabel('square-error')
+    #     plt.plot(min_len_test, square_errors, color='r')
 
-        plt.show()
+    #     plt.show()
