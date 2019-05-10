@@ -61,11 +61,14 @@ class GraspingPolicy():
         
     # calculate where other finger should go
     def grasp_vertices(self, vertices, normals):
+        '''
         vertices2 = vertices + normals * MIN_HAND_DISTANCE
-        grasp_vertices = np.empty((vertices.shape[0], 2, 3))
-        grasp_vertices[:, 0] = vertices
-        grasp_vertices[:, 1] = vertices2
-        return grasp_vertices
+        '''
+        offset = 0.02
+        contact_point1 = vertices - offset * normals
+        contact_point2 = vertices + (MAX_HAND_DISTANCE-offset) * normals
+        contact_vertices = np.array([contact_point1, contact_point2])
+        return contact_vertices
     
     def compute_approach_direction(self, mesh, grasp_vertices):
 
@@ -105,31 +108,31 @@ class GraspingPolicy():
         # it means all approach directions will bump with part 
         return -1
 
-# class GraspingPolicy_old():
-#     def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
-#         """
-#         Parameters
-#         ----------
-#         n_vert : int
-#             We are sampling vertices on the surface of the object, and will use pairs of
-#             these vertices as grasp candidates
-#         n_grasps : int
-#             how many grasps to sample.  Each grasp is a pair of vertices
-#         n_execute : int
-#             how many grasps to return in policy.action()
-#         n_facets : int
-#             how many facets should be used to approximate the friction cone between the
-#             finger and the object
-#         metric_name : string
-#             name of one of the function in src/lab2/metrics/metrics.py
-#         """
-#         self.n_vert = n_vert
-#         self.n_grasps = n_grasps
-#         self.n_facets = n_facets
-#         self.n_execute = n_execute
-#         # This is a function, one of the functions in src/lab2/metrics/metrics.py
-#         self.metric = eval(metric_name)
-#         self.metric_name = metric_name
+class GraspingPolicy_old():
+    def __init__(self, n_vert, n_grasps, n_execute, n_facets, metric_name):
+        """
+        Parameters
+        ----------
+        n_vert : int
+            We are sampling vertices on the surface of the object, and will use pairs of
+            these vertices as grasp candidates
+        n_grasps : int
+            how many grasps to sample.  Each grasp is a pair of vertices
+        n_execute : int
+            how many grasps to return in policy.action()
+        n_facets : int
+            how many facets should be used to approximate the friction cone between the
+            finger and the object
+        metric_name : string
+            name of one of the function in src/lab2/metrics/metrics.py
+        """
+        self.n_vert = n_vert
+        self.n_grasps = n_grasps
+        self.n_facets = n_facets
+        self.n_execute = n_execute
+        # This is a function, one of the functions in src/lab2/metrics/metrics.py
+        self.metric = eval(metric_name)
+        self.metric_name = metric_name
 
     def vertices_to_baxter_hand_pose(self, grasp_vertices, approach_direction, obj_name):
         """

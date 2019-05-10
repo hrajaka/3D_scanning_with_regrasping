@@ -1,20 +1,18 @@
 <launch>
 
- <arg name="marker_size" default="11.4" />
+ <arg name="marker_size" default="7.3" />
  <arg name="max_new_marker_error" default="0.08" />
  <arg name="max_track_error" default="0.2" />
- <arg name="cam_image_topic" default="/camera/camera/color/image_raw" />
- <arg name="cam_info_topic" default="/camera/camera/color/camera_info" />
- <arg name="output_frame" default="/camera_color_optical_frame" />
+ <arg name="cam_image_topic" default="/camera/color/image_raw" />
+ <arg name="cam_info_topic" default="/camera/color/camera_info" />
+ <arg name="output_frame" default="/camera_link" />
  <arg name="serial_no_camera1" default="827312070228" />
 
 
-  <node name="ar_track_alvar_left_hand" pkg="ar_track_alvar" type="individualMarkersNoKinect" respawn="false" output="screen" args="$(arg marker_size) $(arg max_new_marker_error) $(arg max_track_error) $(arg cam_image_topic) $(arg cam_info_topic) $(arg output_frame)" />
-
-
  <!-- Launch camera node -->
-<include file="$(find realsense2_camera)/launch/rs_rgbd.launch">
+<include file="$(find realsense2_camera)/launch/rs_camera.launch">
       <arg name="serial_no"                value="$(arg serial_no_camera1)"/>
+      <arg name="filters"                value="spatial,temporal,decimation,pointcloud,disparity"/>
       <arg name="align_depth"         default="true"/>
 </include>
 

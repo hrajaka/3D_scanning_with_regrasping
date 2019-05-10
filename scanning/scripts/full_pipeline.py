@@ -26,15 +26,17 @@ if __name__ == '__main__':
 	#TODO record object scene and store it as 'object0.pcd'
 
 	## Clean the scenes and isolate them ##
-	# os.system("rosrun scanning processing_pipeline object0.pcd scene.pcd object0_clean.pcd object0_isolated.pcd")  
+	#os.system("rosrun scanning processing_pipeline object0.pcd scene.pcd object0_clean.pcd object0_isolated.pcd")  
 
 	## Generate obj file for the object ##
-	# os.system("rosrun scanning generate_mesh object0_isolated.pcd object0.obj")  
+	os.system("rosrun scanning generate_mesh object0_isolated.pcd object0.obj")  
 
+	'''
 	## Find the next best view ##
-	# os.system("rosrun scanning next_best_view.py")  
+	os.system("rosrun scanning next_best_view.py")  
 
 	## Generate a grasp, the target pose and execute the motion ##
+	#TODO 
 
 	#########
 
@@ -43,19 +45,19 @@ if __name__ == '__main__':
 	#TODO record object scene and store it as 'object1.pcd'
 
 	## Clean the scenes and isolate them ##
-	# os.system("rosrun scanning processing_pipeline object1.pcd scene.pcd object1_clean.pcd object1_isolated.pcd") 
+	os.system("rosrun scanning processing_pipeline object1.pcd scene.pcd object1_clean.pcd object1_isolated.pcd") 
 
 	## Merge the two point clouds ##
-	# os.system("rosrun scanning template_alignment object1_isolated.pcd object0_isolated.pcd merged0.pcd") 
+	os.system("rosrun scanning template_alignment object1_isolated.pcd object0_isolated.pcd merged0.pcd") 
 
 	## Generate an obj file of the merged point cloud ##
-	# os.system("rosrun scanning generate_mesh merged0.pcd merged0.obj")  
+	os.system("rosrun scanning generate_mesh merged0.pcd merged0.obj")  
 
 	## Smooth the obj file with laplacian filter ##
-	# os.system("rosrun scanning smooth_obj.py merged0.obj")  
+	os.system("rosrun scanning smooth_obj.py merged0.obj")  
 
 	## Generate a pcd file from the smoothed obj file ##
-	# os.system("rosrun scanning obj2pcd merged0_smoothed.obj merged0_smoothed.pcd")  
+	os.system("rosrun scanning obj2pcd merged0_smoothed.obj merged0_smoothed.pcd")  
 
 	#########
 
@@ -64,20 +66,20 @@ if __name__ == '__main__':
 	#TODO record object scene and store it as 'object2.pcd'
 
 	## Clean the scenes and isolate them ##
-	# os.system("rosrun scanning processing_pipeline object2.pcd scene.pcd object2_clean.pcd object2_isolated.pcd") 
+	os.system("rosrun scanning processing_pipeline object2.pcd scene.pcd object2_clean.pcd object2_isolated.pcd") 
 
 	## Merge the two point clouds ##
-	# os.system("rosrun scanning template_alignment object2_isolated.pcd merged0_smoothed.pcd merged1.pcd") 
+	os.system("rosrun scanning template_alignment object2_isolated.pcd merged0_smoothed.pcd merged1.pcd") 
 
 	## Generate an obj file of the merged point cloud ##
-	# os.system("rosrun scanning generate_mesh merged1.pcd merged1.obj")  
+	os.system("rosrun scanning generate_mesh merged1.pcd merged1.obj")  
 
 	## Smooth the obj file with laplacian filter ##
-	# os.system("rosrun scanning smooth_obj.py merged1.obj")  
+	os.system("rosrun scanning smooth_obj.py merged1.obj")  
 
 	## Generate a pcd file from the smoothed obj file ##
-	# os.system("rosrun scanning obj2pcd merged1_smoothed.obj merged1_smoothed.pcd")  
-
+	os.system("rosrun scanning obj2pcd merged1_smoothed.obj merged1_smoothed.pcd")  
+'''
 	#########
 
 	

@@ -17,11 +17,14 @@ try:
 except:
     ros_enabled = False
 
-def visualize_mesh(mesh):
+def visualize_mesh(mesh, T_ar_cam, T_obj_cam):
     camera_frame = RigidTransform()
 
-    vis3d.mesh(mesh, style='wireframe')
+    vis3d.mesh(mesh)
     vis3d.pose(camera_frame, alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.pose(T_ar_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.table(T_ar_cam)
+    vis3d.pose(T_obj_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
     vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
     vis3d.show()
 
@@ -35,6 +38,7 @@ def visualize_normals(mesh, vertices, normals):
     scale = 0.01
     normals_scaled = normals * scale
 
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
     vis3d.mesh(mesh, style='wireframe')
     vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
     vis3d.points(vertices, color=(1, 0, 0), scale=0.001)
@@ -45,6 +49,7 @@ def visualize_normals(mesh, vertices, normals):
     vis3d.show()
 
 def visualize_metrics(mesh, vertices, normals, metrics):
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
     scale = 0.01
     normals_scaled = normals * scale
 
@@ -63,6 +68,7 @@ def visualize_metrics(mesh, vertices, normals, metrics):
     vis3d.show()
 
 def visualize_grasps(mesh, vertices, metrics):
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
     vis3d.mesh(mesh, style='wireframe')
     vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
 

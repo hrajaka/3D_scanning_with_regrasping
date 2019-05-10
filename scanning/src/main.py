@@ -1,6 +1,6 @@
-#!/home/hasithr/virtualenv/env/bin/python
-
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
+
+#!/home/hasithr/virtualenv/env/bin/python
 
 #!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
@@ -240,6 +240,7 @@ def parse_args():
     )
     return parser.parse_args()
 
+'''
 def compute_approach_direction(mesh, grasp_vertices, grasp_quality, grasp_normals):
 
     ## initalizing stuff ##
@@ -309,6 +310,7 @@ def compute_approach_direction(mesh, grasp_vertices, grasp_quality, grasp_normal
     
     # it means all approach directions will bump with part 
     return -1
+'''
 
 def vertices_to_baxter_hand_pose(grasp_vertices, approach_direction, obj_name):
     """
@@ -472,21 +474,30 @@ if __name__ == '__main__':
 
         rospy.init_node('main_node')
 
-        ## Load and pre-process mesh ##
-        filename = 'obj/{}.obj'.format(args.obj)
-        print('Loading mesh {}...\n'.format(filename))
 
-        ## TODO: put the mesh in the object frame --> remove the cenroid for the translation, ang use the ar tag to find the rotation
+        print('Getting transform from camera to AR tag...\n')
+        T_ar_cam = lookup_transform('ar_marker_0', 'camera_depth_optical_frame')
+
+        ## Load and pre-process mesh ##
+        filename = 'point_clouds/obj/{}.obj'.format(args.obj)
+        print('Loading mesh {}...\n'.format(filename))
 
         mesh = trimesh.load_mesh(filename)
         mesh.fix_normals()
 
+        T_obj_cam = RigidTransform(T_ar_cam.rotation, mesh.centroid)
+
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
-        utils.visualize_mesh(mesh)
+        utils.visualize_mesh(mesh, T_ar_cam, T_obj_cam)
+
+        print('centroid: ')
+        print(mesh.centroid)
+        mesh.apply_transform(T_obj_cam.inverse().matrix)
+        print('centroid again: ')
+        print(mesh.centroid)
 
        # grasping policies
-        
         print('initializing grasping policy...\n')
         grasping_policy = GraspingPolicy(
             args.n_vert,
@@ -494,14 +505,12 @@ if __name__ == '__main__':
             args.n_execute,
         )
         
-
         # sample the vertices
         print('sampling vertices...\n')
         vertices, normals = grasping_policy.sample_normals(mesh)
         utils.visualize_normals(mesh, vertices, normals)
 
-        metrics = grasping_policy.compute_metrics(
-            mesh, vertices, normals)
+        metrics = grasping_policy.compute_metrics(mesh, vertices, normals)
         utils.visualize_metrics(mesh, vertices, normals, metrics)
         
         ## Picking vertex with best metric ##
@@ -511,15 +520,20 @@ if __name__ == '__main__':
         best_vertex = vertices[np.argmin(metrics)]
         best_normal = normals[np.argmin(metrics)]
 
-        offset = 0.02
-        contact_point1 = best_vertex - offset * best_normal
-        contact_point2 = best_vertex + (MAX_HAND_DISTANCE-offset) * best_normal
-        contact_vertices = np.array([contact_point1, contact_point2])
+        contact_vertices = grasping_policy.grasp_vertices(best_vertex, best_normal)
+
         contact_normals = np.array([best_normal, -best_normal])
 
         ## Compute approach direction ang generate gripper pose in object frame ##
         print('Computing approach direction ang generating gripper pose in object frame...\n')
-        approach_direction = compute_approach_direction(mesh, contact_vertices, metrics[np.argmin(metrics)], contact_normals)
+        #approach_direction = compute_approach_direction(mesh, contact_vertices, metrics[np.argmin(metrics)], contact_normals)
+
+        approach_direction = grasping_policy.compute_approach_direction(mesh, contact_vertices)
+
+        print('approach direction:')
+        print(approach_direction.shape)
+        print(approach_direction)
+        '''
         T_obj_grasp = vertices_to_baxter_hand_pose(contact_vertices, approach_direction, args.obj)
         vis_transform(mesh, T_obj_grasp, contact_vertices)
      
@@ -534,17 +548,7 @@ if __name__ == '__main__':
         T_world_grasp = RigidTransform(T_wg[:3, :3], T_wg[:3, 3], 'world', 'gripper')
 
         execute_grasp(T_world_grasp, planner, gripper)
-
-
-        grasp_vertices = grasping_policy.grasp_vertices(
-            vertices, normals)
-        utils.visualize_grasps(mesh, grasp_vertices, metrics)
-
-        approach_dirs = np.empty((vertices.shape[0], 3))
-        for i, g in enumerate(grasp_vertices):
-            a = grasping_policy.compute_approach_direction(mesh, g)
-            approach_dirs[i] = a
-
+        '''
     except rospy.ROSInterruptException:
         pass
 
