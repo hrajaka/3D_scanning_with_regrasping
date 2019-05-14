@@ -83,7 +83,7 @@ def visualize_metrics(mesh, vertices, normals, metrics):
     vis3d.show()
 
 def visualize_grasps(mesh, vertices, metrics):
-    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.00q)
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
     vis3d.mesh(mesh, style='wireframe')
     vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
 

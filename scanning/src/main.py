@@ -117,9 +117,14 @@ def lookup_transform(to_frame, from_frame='base'):
             print(e)
             rate.sleep()
         attempts += 1
-    tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
-    rot = RigidTransform.rotation_from_quaternion(tag_rot)
-    return RigidTransform(rot, tag_pos, to_frame=to_frame, from_frame=from_frame)
+
+    if attempts >= max_attempts:
+        print('Did not find transform')
+        return None
+    else:
+        tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
+        rot = RigidTransform.rotation_from_quaternion(tag_rot)
+        return RigidTransform(rot, tag_pos, to_frame=to_frame, from_frame=from_frame)
 
 def execute_grasp(T_world_grasp, planner, gripper):
     """
@@ -256,16 +261,25 @@ if __name__ == '__main__':
 
         print('Getting transform from robot to AR tag...\n')
         T_world_ar = lookup_transform('ar_marker_0', 'base')
-        print(T_world_ar)
-
+        if not T_world_ar:
+            print('Did not find TF, using offline version')
+            rot = np.array([[ 0.99746769, -0.03630581,  0.06115626],
+                            [ 0.03882606,  0.99842334, -0.0405384 ],
+                            [-0.05958806,  0.0428102 ,  0.99730464]])
+            tra = np.array( [ 0.48215306,  0.16572939, -0.26271284])
+            T_world_ar = RigidTransform(rot, tra, 'ar_marker_0', 'base')
 
         print('Getting transform from camera to AR tag...\n')
         T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
-        # print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
+        if not T_ar_cam:
+            print('Did not find TF, using offline version')
+            rot = np.array([[ 0.96164055, -0.15495092,  0.2263574 ],
+                            [-0.27416062, -0.57037451,  0.77427959],
+                            [ 0.00913315, -0.80663693, -0.59097669]])
+            tra = np.array( [-0.14501467, -1.161184  ,  0.3797466 ])
+            T_ar_cam = RigidTransform(rot, tra, 'ar_marker_2_0', 'base')
         T_ar_cam.from_frame = 'ar_marker_0'
-        # print('T_ar_cam: from_frame = {}, to_frame={}'.format(T_ar_cam.from_frame, T_ar_cam.to_frame))
         print(T_ar_cam)
-
 
         ## Load and pre-process mesh ##
         filename = '{}.obj'.format(args.obj)
@@ -278,7 +292,7 @@ if __name__ == '__main__':
 
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
-        #utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
+        utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
 
         print('centroid: ')
         print(mesh.centroid)
