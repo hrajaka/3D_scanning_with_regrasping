@@ -7,6 +7,7 @@ import numpy as np
 from numpy import linalg
 import trimesh
 from autolab_core import RigidTransform
+from autolab_core import BagOfPoints
 from visualization import Visualizer3D as vis3d
 from math import sin, cos, atan2, sqrt
 try:
@@ -82,7 +83,7 @@ def visualize_metrics(mesh, vertices, normals, metrics):
     vis3d.show()
 
 def visualize_grasps(mesh, vertices, metrics):
-    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.00q)
     vis3d.mesh(mesh, style='wireframe')
     vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
 
@@ -93,6 +94,27 @@ def visualize_grasps(mesh, vertices, metrics):
     for v, m in zip(vertices, metrics_normalized):
         vis3d.points(v, color=(1 - m, m, 0), scale=0.001)
         vis3d.plot3d(v, color=(1 - m, m, 0), tube_radius=0.0003)
+
+    vis3d.show()
+
+def visualize_plan(mesh, T_obj_world, T_grasp_world):
+    print('mesh.centroid info:')
+    print(mesh.centroid)
+    print(type(mesh.centroid))
+    print(mesh.centroid.dtype)
+    print(mesh.centroid.shape)
+
+    # base frame
+    #vis3d.points(origin, color=(1, 0, 0), scale=0.003)
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
+
+    # T_obj_world
+    #p_obj_world = T_obj_world.apply(origin)
+    #vis3d.points(p_obj_world, color=(0, 1, 0), scale=0.003)
+    vis3d.pose(T_obj_world.inverse(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
+
+    # mesh
+    vis3d.mesh(mesh)
 
     vis3d.show()
 

@@ -1,4 +1,5 @@
-#!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/local/bin/python
+#!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
+
 
 import matplotlib.pyplot as plt
 import numpy as np
@@ -7,66 +8,16 @@ import trimesh
 from mpl_toolkits.mplot3d import Axes3D
 import scipy.spatial
 import matplotlib.path
-import sys
 
 from kin_func_skeleton import rotation_3d
 
-try:
-    import rospy
-    import tf
-    from geometry_msgs.msg import PoseStamped
-    ros_enabled = True
-except:
-    print 'Couldn\'t import ROS.  I assume you\'re running this on your laptop'
-    ros_enabled = False
 
 ####
 
 
-# def lookup_transform(to_frame, from_frame='base'):
-#     """
-#     Returns the AR tag position in world coordinates
-
-#     Parameters
-#     ----------
-#     to_frame : string
-#         examples are: ar_marker_7, gearbox, pawn, ar_marker_3, etc
-#     from_frame : string
-#         lets be real, you're probably only going to use 'base'
-
-#     Returns
-#     -------
-#     :obj:`autolab_core.RigidTransform` AR tag position or object in world coordinates
-#     """
-#     tag_rot = None
-#     tag_pos = None
-
-#     print('CALLING lookup_transform')
-#     print('to_frame: {}, from_frame: {}'.format(to_frame, from_frame))
-#     if not ros_enabled:
-#         print 'I am the lookup transform function!  ' \
-#             + 'You\'re not using ROS, so I\'m returning the Identity Matrix.'
-#         return RigidTransform(to_frame=from_frame, from_frame=to_frame)
-#     print('initializing transformlistener')
-#     listener = tf.TransformListener()
-#     attempts, max_attempts, rate = 0, 10, rospy.Rate(1.0)
-#     while attempts < max_attempts:
-#         print('attempt {}'.format(attempts))
-#         try:
-#             t = listener.getLatestCommonTime(from_frame, to_frame)
-#             tag_pos, tag_rot = listener.lookupTransform(from_frame, to_frame, t)
-#         except Exception as e:
-#             print(e)
-#             rate.sleep()
-#         attempts += 1
-#     tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
-#     rot = RigidTransform.rotation_from_quaternion(tag_rot)
-#     return RigidTransform(rot, tag_pos, to_frame=to_frame, from_frame=from_frame)
-
 if __name__ == '__main__':
 
-    # rospy.init_node('next_best_view_node')
-
+    ## Defining the transform between the box and the camera ##
 
     rotation = np.array([[1,       0,       0], # 'random' values, they will need to be changed for the final setup
                          [0, -0.1979,  0.9802],

@@ -336,18 +336,23 @@ if __name__ == '__main__':
         T_wg = np.matmul(T_wo, T_og)
         print(T_wg)
 
-        
+        T_world_obj = RigidTransform(T_wo[:3, :3], T_wo[:3, 3], 'world', 'object')
         T_world_grasp = RigidTransform(T_wg[:3, :3], T_wg[:3, 3], 'world', 'gripper')
 
+        T_obj_world = T_world_obj.inverse()
+        T_grasp_world = T_world_grasp.inverse()
+        utils.visualize_plan(mesh, T_obj_world, T_grasp_world)
+        print(T_world_grasp)
 
         ## 
 
-        # gripper = baxter_gripper.Gripper('right')
-        # gripper.calibrate()
-        # planner = PathPlanner('{}_arm'.format('right'))
+        gripper = baxter_gripper.Gripper('right')
+        gripper.calibrate()
+        planner = PathPlanner('{}_arm'.format('right'))
 
-
-        # execute_grasp(T_world_grasp, planner, gripper)
+        
+        
+        execute_grasp(T_world_grasp, planner, gripper)
         
     except rospy.ROSInterruptException:
         pass
