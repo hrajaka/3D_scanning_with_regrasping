@@ -1,7 +1,9 @@
+#!/home/hasithr/virtualenv/env/bin/python
+
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
+
 #!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
-#!/home/hasithr/virtualenv/env/bin/python
 
 
 
@@ -119,7 +121,6 @@ def lookup_transform(to_frame, from_frame='base'):
         attempts += 1
 
     if attempts >= max_attempts:
-        print('Did not find transform')
         return None
     else:
         tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
@@ -212,7 +213,7 @@ def parse_args():
     Pretty self explanatory tbh
     """
     parser = argparse.ArgumentParser()
-    parser.add_argument('-obj', type=str, default='pawn', help=
+    parser.add_argument('-obj', type=str, default='obj/offline.obj', help=
         """Which Object you\'re trying to pick up.  Options: gearbox, nozzle, pawn.
         Default: gearbox"""
     )
@@ -268,6 +269,7 @@ if __name__ == '__main__':
                             [-0.05958806,  0.0428102 ,  0.99730464]])
             tra = np.array( [ 0.48215306,  0.16572939, -0.26271284])
             T_world_ar = RigidTransform(rot, tra, 'ar_marker_0', 'base')
+        T_ar_world = T_world_ar.inverse()
 
         print('Getting transform from camera to AR tag...\n')
         T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
@@ -279,28 +281,24 @@ if __name__ == '__main__':
             tra = np.array( [-0.14501467, -1.161184  ,  0.3797466 ])
             T_ar_cam = RigidTransform(rot, tra, 'ar_marker_2_0', 'base')
         T_ar_cam.from_frame = 'ar_marker_0'
-        print(T_ar_cam)
+        T_cam_ar = T_ar_cam.inverse()
+        print('T_cam_ar:')
+        print(T_cam_ar)
 
         ## Load and pre-process mesh ##
-        filename = '{}.obj'.format(args.obj)
+        filename = args.obj
         print('Loading mesh {}...\n'.format(filename))
 
         mesh = trimesh.load_mesh(filename)
         mesh.fix_normals()
 
-        T_obj_cam = RigidTransform(T_ar_cam.rotation, mesh.centroid)
+        T_cam_obj = RigidTransform(T_cam_ar.rotation, mesh.centroid)
 
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
-        utils.visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam)
+        utils.visualize_scene(mesh, T_world_ar, T_ar_cam, T_cam_obj)
 
-        print('centroid: ')
-        print(mesh.centroid)
-        mesh.apply_transform(T_obj_cam.inverse().matrix)
-        print('centroid again: ')
-        print(mesh.centroid)
-
-       # grasping policies
+        # grasping policies
         print('initializing grasping policy...\n')
         grasping_policy = GraspingPolicy(
             args.n_vert,
@@ -363,8 +361,6 @@ if __name__ == '__main__':
         gripper = baxter_gripper.Gripper('right')
         gripper.calibrate()
         planner = PathPlanner('{}_arm'.format('right'))
-
-        
         
         execute_grasp(T_world_grasp, planner, gripper)
         

@@ -18,28 +18,59 @@ try:
 except:
     ros_enabled = False
 
-def visualize_mesh(mesh, T_world_ar, T_ar_cam, T_obj_cam):
-    T_cam_cam = RigidTransform()
+def visualize_test():
+    I = RigidTransform()
+    g_ab = RigidTransform()
+    g_ab.translation = np.array([0.05, 0, 0])
+    g_ab.rotation = np.array([[ 0, -1,  0],
+                              [ 1,  0,  0],
+                              [ 0,  0,  1]])
 
+    q_a = np.array([0., 0., 0.])
+
+    p_b = np.array([0., 0., 0.])
+    p_a = apply_transform(p_b, g_ab)
+
+    print('g_ab = \n{}'.format(g_ab.matrix))
+    
+    vis3d.pose(I, alpha=0.01, tube_radius=0.001, center_scale=0.001)
+    vis3d.points(q_a, color=(1, 0, 0), scale=0.005)
+
+    vis3d.pose(g_ab, alpha=0.01, tube_radius=0.001, center_scale=0.001)
+    vis3d.points(p_a, color=(0, 1, 0), scale=0.005)
+    vis3d.show()
+
+def visualize_scene(mesh, T_world_ar, T_ar_cam, T_cam_obj):
+    T_cam_cam = RigidTransform()
+    T_obj_cam = T_cam_obj.inverse()
     T_cam_ar = T_ar_cam.inverse()
-    p_ar = np.array([0, 0, 0, 1])
-    p_cam = np.matmul(T_cam_ar.matrix, p_ar)[:3]
 
     Twc = np.matmul(T_world_ar.matrix, T_ar_cam.matrix)
     T_world_cam = RigidTransform(Twc[:3, :3], Twc[:3, 3])
-
-    vis3d.mesh(mesh)
-    vis3d.pose(T_cam_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    vis3d.pose(T_ar_cam.inverse(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    vis3d.points(p_cam, color=(1, 0, 1), scale=0.003)
-    #vis3d.table(T_ar_cam)
-    vis3d.pose(T_world_cam.inverse(), alpha=0.05, tube_radius=0.001, center_scale=0.002)
-    #vis3d.table(T_world_cam)
-    #vis3d.pose(T_obj_cam, alpha=0.01, tube_radius=0.001, center_scale=0.002)
-    #vis3d.points(mesh.centroid, color=(0, 0, 0), scale=0.003)
-
+    T_cam_world = T_world_cam.inverse()
     
+    o = np.array([0., 0., 0.])
+    centroid_cam = apply_transform(o, T_cam_obj)
+    tag_cam = apply_transform(o, T_cam_ar)
+    robot_cam = apply_transform(o, T_cam_world)
 
+    # camera
+    vis3d.points(o, color=(0, 1, 0), scale=0.01)
+    vis3d.pose(T_cam_cam, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+    
+    # object
+    vis3d.mesh(mesh)
+    vis3d.points(centroid_cam, color=(0, 0, 0), scale=0.01)
+    vis3d.pose(T_cam_obj, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+
+    # AR tag
+    vis3d.points(tag_cam, color=(1, 0, 1), scale=0.01)
+    vis3d.pose(T_cam_ar, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+    vis3d.table(T_cam_ar, dim=0.074)
+    
+    # robot
+    vis3d.points(robot_cam, color=(1, 0, 0), scale=0.01)
+    vis3d.pose(T_cam_world, alpha=0.05, tube_radius=0.005, center_scale=0.002)
 
     vis3d.show()
 
@@ -118,6 +149,11 @@ def visualize_plan(mesh, T_obj_world, T_grasp_world):
 
     vis3d.show()
 
+def apply_transform(point, transform):
+    mat = transform.matrix
+    p = np.append(point, 1)
+    p_new = np.matmul(mat, p)
+    return p_new[:3]
 
 '''
 def compute_metrics(mesh, vertices, normals):
