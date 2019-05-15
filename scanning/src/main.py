@@ -293,10 +293,13 @@ if __name__ == '__main__':
         mesh.fix_normals()
 
         T_cam_obj = RigidTransform(T_cam_ar.rotation, mesh.centroid)
+        T_obj_cam = T_cam_obj.inverse()
 
         ## Visualize the mesh ##
         print('Visualizing mesh (close visualizer window to continue)...\n')
         utils.visualize_scene(mesh, T_world_ar, T_ar_cam, T_cam_obj)
+
+        mesh.apply_transform(T_obj_cam.matrix)
 
         # grasping policies
         print('initializing grasping policy...\n')
@@ -310,7 +313,6 @@ if __name__ == '__main__':
         print('sampling vertices...\n')
         vertices, normals = grasping_policy.sample_normals(mesh)
         #utils.visualize_normals(mesh, vertices, normals)
-        raw_input('Press ENTER to visualize grasp')
         metrics = grasping_policy.compute_metrics(mesh, vertices, normals)
         utils.visualize_metrics(mesh, vertices, normals, metrics)
         
@@ -325,38 +327,33 @@ if __name__ == '__main__':
 
         contact_normals = np.array([best_normal, -best_normal])
 
-        ## Compute approach direction ang generate gripper pose in object frame ##
-        print('Computing approach direction ang generating gripper pose in object frame...\n')
-        #approach_direction = compute_approach_direction(mesh, contact_vertices, metrics[np.argmin(metrics)], contact_normals)
+        ## Compute approach direction and generate gripper pose in object frame ##
+        print('Computing approach direction and generating gripper pose in object frame...\n')
 
         approach_direction = grasping_policy.compute_approach_direction(mesh, contact_vertices)
 
-
-        approach_direction = - approach_direction
-        print('approach direction:')
-        print(approach_direction.shape)
-        print(approach_direction)
+        #approach_direction = - approach_direction
         
         T_obj_grasp = grasping_policy.vertices_to_baxter_hand_pose(contact_vertices, approach_direction, args.obj)
+        print('visualizing grasp transform...\n')
+        utils.visualize_gripper(mesh, T_obj_grasp, contact_vertices)
         grasping_policy.vis_transform(mesh, T_obj_grasp, contact_vertices)
-        
 
         ## Generate gripper pose in world frame ##
         print('Generating gripper pose in world frame...\n')
-        T_wo = np.matmul(np.matmul(T_world_ar.matrix, T_ar_cam.matrix), T_obj_cam.inverse().matrix) 
-        T_og = T_obj_grasp.matrix
-        T_wg = np.matmul(T_wo, T_og)
-        print(T_wg)
+        T_wc = np.matmul(T_world_ar.matrix, T_ar_cam.matrix)
+        T_wo = np.matmul(T_wc, T_cam_obj.matrix) 
+        T_wg = np.matmul(T_wo, T_obj_grasp.matrix)
 
+        T_world_cam = RigidTransform(T_wc[:3, :3], T_wc[:3, 3], 'world', 'cam')
         T_world_obj = RigidTransform(T_wo[:3, :3], T_wo[:3, 3], 'world', 'object')
         T_world_grasp = RigidTransform(T_wg[:3, :3], T_wg[:3, 3], 'world', 'gripper')
 
         T_obj_world = T_world_obj.inverse()
         T_grasp_world = T_world_grasp.inverse()
-        utils.visualize_plan(mesh, T_obj_world, T_grasp_world)
-        print(T_world_grasp)
-
-        ## 
+        print('visualizing plan...\n')
+        utils.visualize_plan(mesh, T_world_obj, T_world_grasp)
+        sys.exit()
 
         gripper = baxter_gripper.Gripper('right')
         gripper.calibrate()

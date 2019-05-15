@@ -128,24 +128,42 @@ def visualize_grasps(mesh, vertices, metrics):
 
     vis3d.show()
 
-def visualize_plan(mesh, T_obj_world, T_grasp_world):
-    print('mesh.centroid info:')
-    print(mesh.centroid)
-    print(type(mesh.centroid))
-    print(mesh.centroid.dtype)
-    print(mesh.centroid.shape)
+def visualize_gripper(mesh, T_obj_grasp, vertices):
+    o = np.array([0., 0., 0.])
+    grasp = apply_transform(o, T_obj_grasp)
+
+    # object
+    vis3d.mesh(mesh)
+    vis3d.points(o, color=(0, 0, 0), scale=0.002)
+    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.001)
+
+    # gripper
+    vis3d.points(grasp, color=(1, 0, 0), scale=0.002)
+    vis3d.points(vertices, color=(1, 0, 0), scale=0.002)
+    vis3d.pose(T_obj_grasp, alpha=0.01, tube_radius=0.001, center_scale=0.001)
+
+    vis3d.show()
+
+def visualize_plan(mesh, T_world_obj, T_world_grasp):
+    # visualize the plan in the world frame
+    mesh.apply_transform(T_world_obj.matrix)
+
+    o = np.array([0., 0., 0.])
+    obj = apply_transform(o, T_world_obj)
+    grasp = apply_transform(o, T_world_grasp)
 
     # base frame
-    #vis3d.points(origin, color=(1, 0, 0), scale=0.003)
-    vis3d.pose(RigidTransform(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
+    vis3d.points(o, color=(1, 0, 0), scale=0.01)
+    vis3d.pose(RigidTransform(), alpha=0.05, tube_radius=0.005, center_scale=0.002)
 
-    # T_obj_world
-    #p_obj_world = T_obj_world.apply(origin)
-    #vis3d.points(p_obj_world, color=(0, 1, 0), scale=0.003)
-    vis3d.pose(T_obj_world.inverse(), alpha=0.01, tube_radius=0.001, center_scale=0.002)
-
-    # mesh
+    # object
     vis3d.mesh(mesh)
+    vis3d.points(obj, color=(0, 0, 0), scale=0.01)
+    vis3d.pose(T_world_obj, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+
+    # grasp
+    vis3d.points(grasp, color=(0, 1, 1), scale=0.01)
+    vis3d.pose(T_world_grasp, alpha=0.05, tube_radius=0.005, center_scale=0.002)
 
     vis3d.show()
 
