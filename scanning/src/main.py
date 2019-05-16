@@ -332,7 +332,7 @@ if __name__ == '__main__':
 
         approach_direction = grasping_policy.compute_approach_direction(mesh, contact_vertices)
 
-        #approach_direction = - approach_direction
+        approach_direction = - approach_direction
         
         T_obj_grasp = grasping_policy.vertices_to_baxter_hand_pose(contact_vertices, approach_direction, args.obj)
         print('visualizing grasp transform...\n')
@@ -353,6 +353,7 @@ if __name__ == '__main__':
         T_grasp_world = T_world_grasp.inverse()
         print('visualizing plan...\n')
         utils.visualize_plan(mesh, T_world_obj, T_world_grasp)
+        
         sys.exit()
 
         gripper = baxter_gripper.Gripper('right')

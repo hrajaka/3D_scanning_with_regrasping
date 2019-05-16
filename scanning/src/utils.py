@@ -153,17 +153,17 @@ def visualize_plan(mesh, T_world_obj, T_world_grasp):
     grasp = apply_transform(o, T_world_grasp)
 
     # base frame
-    vis3d.points(o, color=(1, 0, 0), scale=0.01)
-    vis3d.pose(RigidTransform(), alpha=0.05, tube_radius=0.005, center_scale=0.002)
+    vis3d.points(o, color=(1, 0, 0), scale=0.005)
+    vis3d.pose(RigidTransform(), alpha=0.03, tube_radius=0.002, center_scale=0.001)
 
     # object
     vis3d.mesh(mesh)
-    vis3d.points(obj, color=(0, 0, 0), scale=0.01)
-    vis3d.pose(T_world_obj, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+    vis3d.points(obj, color=(0, 0, 0), scale=0.005)
+    vis3d.pose(T_world_obj, alpha=0.03, tube_radius=0.002, center_scale=0.001)
 
     # grasp
-    vis3d.points(grasp, color=(0, 1, 1), scale=0.01)
-    vis3d.pose(T_world_grasp, alpha=0.05, tube_radius=0.005, center_scale=0.002)
+    vis3d.points(grasp, color=(0, 1, 1), scale=0.005)
+    vis3d.pose(T_world_grasp, alpha=0.03, tube_radius=0.002, center_scale=0.001)
 
     vis3d.show()
 
