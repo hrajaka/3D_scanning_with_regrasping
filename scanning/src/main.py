@@ -1,6 +1,6 @@
-#!/home/hasithr/virtualenv/env/bin/python
-
 #!/home/cc/ee106b/sp19/class/ee106b-aai/virtualenvironment/my_new_app/bin/python
+
+#!/home/hasithr/virtualenv/env/bin/python
 
 #!/home/cc/ee106b/sp19/class/ee106b-abj/python-virtual-environments/env/bin/python
 
@@ -43,7 +43,7 @@ MAX_HAND_DISTANCE = 0.085
 MIN_HAND_DISTANCE = 0.045
 CONTACT_MU = 0.5
 CONTACT_GAMMA = 0.1
-FINGER_LENGTH = 0.1
+FINGER_LENGTH = 0.11
 
 
 
@@ -115,17 +115,15 @@ def lookup_transform(to_frame, from_frame='base'):
         try:
             t = listener.getLatestCommonTime(from_frame, to_frame)
             tag_pos, tag_rot = listener.lookupTransform(from_frame, to_frame, t)
+
         except Exception as e:
             print(e)
             rate.sleep()
         attempts += 1
 
-    if attempts >= max_attempts:
-        return None
-    else:
-        tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
-        rot = RigidTransform.rotation_from_quaternion(tag_rot)
-        return RigidTransform(rot, tag_pos, to_frame=to_frame, from_frame=from_frame)
+    tag_rot = np.array([tag_rot[3], tag_rot[0], tag_rot[1], tag_rot[2]])
+    rot = RigidTransform.rotation_from_quaternion(tag_rot)
+    return RigidTransform(rot, tag_pos, to_frame=to_frame, from_frame=from_frame)
 
 def execute_grasp(T_world_grasp, planner, gripper):
     """
@@ -161,7 +159,7 @@ def execute_grasp(T_world_grasp, planner, gripper):
     print('---------- MOVING TO INTERMEDIATE POSITION ----------')
     temp_matrix = np.array([[1, 0, 0, 0],
                             [0, 1, 0, 0],
-                            [0, 0, 1, -0.1],
+                            [0, 0, 1, -0.3],
                             [0, 0, 0, 1]])
     T1 = np.matmul(T_world_grasp.matrix, temp_matrix)
     pose_stamped_1 = matrixToPoseStamped(T1)
@@ -170,39 +168,48 @@ def execute_grasp(T_world_grasp, planner, gripper):
 
     planner.execute_plan(plan_1)
 
-    print('---------- MOVING TO FINAL POSITION ----------')
+    print('---------- MOVING TO GRASP POSITION ----------')
     pose_stamped_2 = RigidTransformToPoseStamped(T_world_grasp)
+    pose_stamped_2.pose.position.z = pose_stamped_2.pose.position.z
 
     plan_2 = planner.plan_to_pose(pose_stamped_2)
 
     planner.execute_plan(plan_2)
 
-    print('----------CLOSING GRIPPER----------')
+    print('---------- CLOSING GRIPPER ----------')
     close_gripper()
 
     print('---------- MOVING TO UP POSITION ----------')
     pose_stamped_3 = RigidTransformToPoseStamped(T_world_grasp)
-    pose_stamped_3.pose.position.z = pose_stamped_3.pose.position.z + 0.3
+    pose_stamped_3.pose.position.z = pose_stamped_3.pose.position.z + 0.4
 
     plan_3 = planner.plan_to_pose(pose_stamped_3)
 
     planner.execute_plan(plan_3)
 
-    print('---------- MOVING TO LATERAL POSITION ----------')
-    pose_stamped_4 = RigidTransformToPoseStamped(T_world_grasp)
-    pose_stamped_4.pose.position.y = pose_stamped_4.pose.position.y + 0.2
+    print('---------- MOVING TO ROTATED POSITION ----------')
+    xi = np.array([0, 0, 0, 0, 0, 1])
+    theta = 20. * np.pi / 180.
+    g = utils.homog_3d(xi, theta)
+    T_rotated = np.matmul(T_world_grasp.matrix, g)
+
+    pose_stamped_4 = matrixToPoseStamped(T_rotated)
+    pose_stamped_4.pose.position.z = pose_stamped_4.pose.position.z
 
     plan_4 = planner.plan_to_pose(pose_stamped_4)
 
     planner.execute_plan(plan_4)
 
-    print('----------OPENING GRIPPER----------')
+    print('---------- OPENING GRIPPER ----------')
     open_gripper()
 
     print('---------- MOVING TO UP POSITION NBR 2 ----------')
-    pose_stamped_5 = pose_stamped_4
-    pose_stamped_5.pose.position.z = pose_stamped_5.pose.position.z + 0.3
-    pose_stamped_5.pose.position.y = pose_stamped_5.pose.position.y - 0.2
+    temp_matrix = np.array([[1, 0, 0, 0],
+                            [0, 1, 0, 0],
+                            [0, 0, 1, -0.3],
+                            [0, 0, 0, 1]])
+    T2 = np.matmul(T_rotated, temp_matrix)
+    pose_stamped_5 = matrixToPoseStamped(T2)
 
     plan_5 = planner.plan_to_pose(pose_stamped_5)
 
@@ -244,6 +251,10 @@ def parse_args():
     parser.add_argument('--debug', action='store_true', help=
         'Whether or not to use a random seed'
     )
+    parser.add_argument('--offline', action='store_true', help=
+        'Use pre-recorded data'
+    )
+
     return parser.parse_args()
 
 
@@ -260,31 +271,33 @@ if __name__ == '__main__':
 
         rospy.init_node('main_node')
 
-        print('Getting transform from robot to AR tag...\n')
-        T_world_ar = lookup_transform('ar_marker_0', 'base')
-        if not T_world_ar:
-            print('Did not find TF, using offline version')
+        if args.offline:
+            print('using transforms from prerecorded data')
             rot = np.array([[ 0.99746769, -0.03630581,  0.06115626],
-                            [ 0.03882606,  0.99842334, -0.0405384 ],
-                            [-0.05958806,  0.0428102 ,  0.99730464]])
+                                [ 0.03882606,  0.99842334, -0.0405384 ],
+                                [-0.05958806,  0.0428102 ,  0.99730464]])
             tra = np.array( [ 0.48215306,  0.16572939, -0.26271284])
             T_world_ar = RigidTransform(rot, tra, 'ar_marker_0', 'base')
-        T_ar_world = T_world_ar.inverse()
 
-        print('Getting transform from camera to AR tag...\n')
-        T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
-        if not T_ar_cam:
-            print('Did not find TF, using offline version')
             rot = np.array([[ 0.96164055, -0.15495092,  0.2263574 ],
-                            [-0.27416062, -0.57037451,  0.77427959],
-                            [ 0.00913315, -0.80663693, -0.59097669]])
+                                [-0.27416062, -0.57037451,  0.77427959],
+                                [ 0.00913315, -0.80663693, -0.59097669]])
             tra = np.array( [-0.14501467, -1.161184  ,  0.3797466 ])
             T_ar_cam = RigidTransform(rot, tra, 'ar_marker_2_0', 'base')
-        T_ar_cam.from_frame = 'ar_marker_0'
-        T_cam_ar = T_ar_cam.inverse()
-        print('T_cam_ar:')
-        print(T_cam_ar)
+            T_ar_cam.from_frame = 'ar_marker_0'
 
+        else:
+            print('Getting transform from robot to AR tag...\n')
+            T_world_ar = lookup_transform('ar_marker_0', 'base')
+            print(T_world_ar)
+
+            print('Getting transform from camera to AR tag...\n')
+            T_ar_cam = lookup_transform('camera_depth_optical_frame', 'ar_marker_2_0')
+            print(T_ar_cam)
+            T_ar_cam.from_frame = 'ar_marker_0'
+
+        T_ar_world = T_world_ar.inverse()
+        T_cam_ar = T_ar_cam.inverse()
         ## Load and pre-process mesh ##
         filename = args.obj
         print('Loading mesh {}...\n'.format(filename))
@@ -354,7 +367,7 @@ if __name__ == '__main__':
         print('visualizing plan...\n')
         utils.visualize_plan(mesh, T_world_obj, T_world_grasp)
         
-        sys.exit()
+        # sys.exit()
 
         gripper = baxter_gripper.Gripper('right')
         gripper.calibrate()
